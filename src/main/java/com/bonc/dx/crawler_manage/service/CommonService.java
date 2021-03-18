@@ -20,5 +20,12 @@ public class CommonService {
         }
     }
 
+    public void insertLogInfo(String web_name,String program_name,String sign,String message){
+        try {
+            commMapper.insertLogInfo(web_name,program_name,sign,message);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
 
 }

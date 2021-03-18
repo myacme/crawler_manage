@@ -11,4 +11,14 @@
         (#{title}, #{sample}, #{content}, #{date},
             #{city}, #{url}, #{source}, #{type}, #{isCrawl})
     </insert>
+
+    <insert id="insertLogInfo">
+        insert into log_info(web_name,program_name,sign,message) values (
+        #{web_name}
+        ,#{program_name}
+        ,#{sign}
+        ,#{message}
+        )
+    </insert>
+
 </mapper>

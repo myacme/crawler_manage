@@ -21,6 +21,7 @@ package com.bonc.dx.crawler_manage.util;
 
 
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -51,5 +52,19 @@ public class DateUtil {
 		return parse;
 	}
 
+	public static Date getDate() {
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(new Date());
+//		calendar.add(Calendar.DAY_OF_MONTH, -Integer.parseInt(configUtil.getProperties().getProperty("date")));
+		calendar.add(Calendar.DAY_OF_MONTH, -1);
+		Date parse = null;
+		try {
+			parse = simpleDateFormat.parse(simpleDateFormat.format(calendar.getTime()));
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		return parse;
+	}
 
 }
