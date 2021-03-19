@@ -9,6 +9,8 @@ public interface CommMapper {
 
     void insert(CrawlerEntity entity);
 
+    void insertTable(@Param("param") CrawlerEntity entity,@Param("table_name") String table_name);
+
     void insertLogInfo(@Param("web_name") String web_name,@Param("program_name") String program_name,@Param("sign") String sign,@Param("message") String message);
 
 }

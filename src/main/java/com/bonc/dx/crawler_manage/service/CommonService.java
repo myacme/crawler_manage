@@ -20,6 +20,14 @@ public class CommonService {
         }
     }
 
+    public void insertTable(CrawlerEntity crawlerEntity,String table_name){
+        try {
+            commMapper.insertTable(crawlerEntity,table_name);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
     public void insertLogInfo(String web_name,String program_name,String sign,String message){
         try {
             commMapper.insertLogInfo(web_name,program_name,sign,message);

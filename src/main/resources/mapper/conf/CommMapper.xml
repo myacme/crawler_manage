@@ -12,6 +12,15 @@
             #{city}, #{url}, #{source}, #{type}, #{isCrawl})
     </insert>
 
+    <insert id="insertTable">
+        insert into ${table_name}
+        (title,sample,content,date,
+         city,url,source,type,isCrawl)
+         values
+        (#{param.title}, #{param.sample}, #{param.content}, #{param.date},
+            #{param.city}, #{param.url}, #{param.source}, #{param.type}, #{param.isCrawl})
+    </insert>
+
     <insert id="insertLogInfo">
         insert into log_info(web_name,program_name,sign,message) values (
         #{web_name}
