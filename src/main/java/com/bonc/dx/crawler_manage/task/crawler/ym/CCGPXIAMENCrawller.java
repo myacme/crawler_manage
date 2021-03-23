@@ -10,8 +10,6 @@ import org.jsoup.nodes.Document;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,20 +17,15 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author ym
  * @date 2021-3-3 11:03:52
  */
 @Component
-public class CCGPGANSUCrawller implements Crawler {
+public class CCGPXIAMENCrawller implements Crawler {
 
 	@Autowired
 	ChromeDriverPool driverPool;
@@ -40,17 +33,17 @@ public class CCGPGANSUCrawller implements Crawler {
 	CommonService commonService;
 
 
-	private static Logger log = LoggerFactory.getLogger(CCGPGANSUCrawller.class);
+	private static Logger log = LoggerFactory.getLogger(CCGPXIAMENCrawller.class);
 	private static long ct = 0;
 	private static boolean isNext = true;
 	//测试用表
 	private static final String TABLE_NAME = "data_ccgp_henan_info";
-	private static final String SOURCE = "甘肃省政府采购网";
-	private static final String CITY = "甘肃省";
+	private static final String SOURCE = "福建省政府采购网";
+	private static final String CITY = "福建省";
 	private static String begin_time;
 	private static String end_time;
 	public static  final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-	private static String reg = "http://www.ccgp-gansu.gov.cn/web/article/128/0/index.htm";
+	private static String reg = "http://www.ccgp-xiamen.gov.cn/350200/noticelist/e8d2cd51915e4c338dc1c6ee2f02b127/";
 //	private static String reg = "http://search.ccgp.gov.cn/bxsearch?searchtype=1&page_index=138&bidSort=&buyerName=&projectId=&pinMu=&bidType=&dbselect=bidx&kw=&start_time=2021%3A01%3A26&end_time=2021%3A02%3A02&timeType=2&displayZone=&zoneId=&pppStatus=0&agentName=";
 
 	@Autowired
@@ -79,44 +72,19 @@ public class CCGPGANSUCrawller implements Crawler {
 			end_time = days.get("start");
             begin_time = days.get("end");
 
-//			driver.findElement(By.cssSelector("#stime")).clear();
-//			driver.findElement(By.cssSelector("#stime")).sendKeys(begin_time);
-//			driver.findElement(By.cssSelector("#etime")).clear();
-//			driver.findElement(By.cssSelector("#etime")).sendKeys(end_time);
-			driver.findElement(By.cssSelector("input[value=\"查 询\"]")).click();
-			Thread.sleep(5000);
-
-//			List<WebElement> left = driver.findElements(By.cssSelector("ul.type-list > li > a"));
-//			List<String> lfurls = new ArrayList<>();
-//			List<Map<String,String>> lfurls = new ArrayList<>();
-
-//			for (WebElement lf : left) {
-
-//				String type = lf.getText();
-//				lf.click();
-//				Thread.sleep(5000);
-
 				isNext = true;
 
-
-
 					while (true) {
-						List<WebElement> lis = driver.findElements(By.cssSelector("ul.Expand_SearchSLisi > li"));
+						List<WebElement> lis = driver.findElements(By.cssSelector("tr.gradeX"));
 //						String type = driver.findElement(By.cssSelector("#gonggao_type")).getText();
 //						System.out.println("lis.size:"+lis.size());
 //						System.out.println("type:"+type);
 						for (WebElement li : lis) {
-							String url = li.findElement(By.cssSelector("a")).getAttribute("href");
+							String url = li.findElement(By.cssSelector("td > a")).getAttribute("href");
 
-							String title = li.findElement(By.cssSelector("a")).getText();
-							String type = li.findElement(By.cssSelector("p:nth-child(3) > span > strong")).getText();
-							type = type.replace("\"","").replace(" ","").split("\\|")[0];
-							String date = li.findElement(By.cssSelector("p:nth-child(2) > span")).getText();
-							date = date.split("\\|")[1].replace("发布时间：","").replace(" ","").substring(0,10);
+							String title = li.findElement(By.cssSelector("td > a")).getText();
 
-
-//							String date = doc.select("span.feed-time").text().replace("发布时间：","")
-//									.replace("年","-").replace("月","-").replace("日","");
+							String date = li.findElement(By.cssSelector("td:last-child")).getText();
 							if (!date.equals("") && simpleDateFormat.parse(end_time).before(simpleDateFormat.parse(date))) {
 								//结束时间在爬取到的时间之前 就下一个
 								continue;
@@ -127,8 +95,10 @@ public class CCGPGANSUCrawller implements Crawler {
 								//详情页面爬取content  单独开窗口
 								driver2.get(url);
 								Thread.sleep(2000);
+								String type = driver2.findElement(By.cssSelector(".leads > span")).getText();
+								type = type.replace("\"","").replace(" ","").split(">")[2];
 								Document doc = Jsoup.parse(driver2.getPageSource());
-								String content = doc.select("#fontzoom").text();
+								String content = doc.select("#print-content > div.notice-con").text();
 
 								//加入实体类 入库
 								CrawlerEntity insertMap = new CrawlerEntity();
@@ -149,10 +119,8 @@ public class CCGPGANSUCrawller implements Crawler {
 						}
 						if (isNext) {
 							log.info(driver.getCurrentUrl());
-							WebElement next = driver.findElement(By.cssSelector("#next"));
-							String total = driver.findElement(By.cssSelector("#total")).getAttribute("value");
-							String current = driver.findElement(By.cssSelector("#current")).getAttribute("value");
-							if (total.equals(current)){
+							WebElement next = driver.findElement(By.cssSelector(".pageGroup > button:nth-last-child(2)"));
+							if (!next.getText().contains("下一页")){
 								break;
 							}
 							next.click();
@@ -163,10 +131,10 @@ public class CCGPGANSUCrawller implements Crawler {
 					}
 
 //			}
-			commonService.insertLogInfo(SOURCE,CCGPGANSUCrawller.class.getName(),"success","");
+			commonService.insertLogInfo(SOURCE,CCGPXIAMENCrawller.class.getName(),"success","");
 		} catch (Exception e) {
 			e.printStackTrace();
-			commonService.insertLogInfo(SOURCE,CCGPGANSUCrawller.class.getName(),"error",e.getMessage());
+			commonService.insertLogInfo(SOURCE,CCGPXIAMENCrawller.class.getName(),"error",e.getMessage());
 		} finally {
 			if(driver != null){
 				driverPool.release(driver);

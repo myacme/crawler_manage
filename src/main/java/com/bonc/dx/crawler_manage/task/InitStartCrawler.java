@@ -27,14 +27,14 @@ public class InitStartCrawler implements CommandLineRunner, ApplicationContextAw
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        Map<String, Crawler> crawlers = applicationContext.getBeansOfType(Crawler.class);
+        /*Map<String, Crawler> crawlers = applicationContext.getBeansOfType(Crawler.class);
         for(Map.Entry entry : crawlers.entrySet()){
             System.out.println(entry.getKey() + ":" + entry.getValue());
-//            if(entry.getKey().equals("bjGgzyfwCrawller")){
+            if(entry.getKey().equals("GANSUGOVCrawller")){
                 crawlers.get(entry.getKey()).run();
 
-//            }
-        }
+            }
+        }*/
 
     }
 }
