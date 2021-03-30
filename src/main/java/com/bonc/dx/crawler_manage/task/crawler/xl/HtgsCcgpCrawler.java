@@ -178,7 +178,7 @@ public class HtgsCcgpCrawler implements Crawler {
                     entity.setType("政府采购合同公告");
 
                     entity.setTitle(li.getElementsByTag("a").first().text());
-                    entity.setDate(li.getElementsByTag("span").get(2).text());
+                    entity.setDate(li.getElementsByTag("span").get(1).text());
                     entity.setCity("");
                     entity.setIsCrawl("1");
 
