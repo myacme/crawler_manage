@@ -138,7 +138,6 @@ public class QHGGZYJYGOVCrawller implements Crawler {
 							List<WebElement> elements = driver.findElements(By.cssSelector("#pager > ul > li"));
 							WebElement next = null;
 							for (int j = 0; j < elements.size(); j++) {
-								WebElement element = elements.get(j);
 								if (elements.get(j).getAttribute("class") != null && elements.get(j).getAttribute("class").equals("active")){
 									if (j==elements.size()-1){
 										isNext = false;
