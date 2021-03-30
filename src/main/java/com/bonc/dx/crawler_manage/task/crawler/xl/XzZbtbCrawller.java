@@ -3,6 +3,7 @@ package com.bonc.dx.crawler_manage.task.crawler.xl;
 import com.bonc.dx.crawler_manage.task.crawler.CommonUtil;
 import com.bonc.dx.crawler_manage.task.crawler.Crawler;
 
+import com.bonc.dx.crawler_manage.task.crawler.xl.sub.XzZbtbCrawllerUsePool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

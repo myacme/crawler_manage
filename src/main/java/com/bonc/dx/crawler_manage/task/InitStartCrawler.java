@@ -8,8 +8,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ResourceUtils;
 
+import java.io.File;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
@@ -27,14 +33,16 @@ public class InitStartCrawler implements CommandLineRunner, ApplicationContextAw
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        /*Map<String, Crawler> crawlers = applicationContext.getBeansOfType(Crawler.class);
+        Map<String, Crawler> crawlers = applicationContext.getBeansOfType(Crawler.class);
         for(Map.Entry entry : crawlers.entrySet()){
             System.out.println(entry.getKey() + ":" + entry.getValue());
-            if(entry.getKey().equals("GANSUGOVCrawller")){
+            if(entry.getKey().equals("htgsCcgpCrawler")){
                 crawlers.get(entry.getKey()).run();
 
             }
-        }*/
+        }
+
+
 
     }
 }

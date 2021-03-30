@@ -4,6 +4,7 @@ package com.bonc.dx.crawler_manage.task.crawler.xl;
 import com.bonc.dx.crawler_manage.pool.driver.ChromeDriverPool;
 import com.bonc.dx.crawler_manage.task.crawler.CommonUtil;
 import com.bonc.dx.crawler_manage.task.crawler.Crawler;
+import com.bonc.dx.crawler_manage.task.crawler.xl.sub.TjCcgpCrawllerUsePool;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;

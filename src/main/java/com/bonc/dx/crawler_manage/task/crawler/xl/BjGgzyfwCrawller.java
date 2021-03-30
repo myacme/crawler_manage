@@ -5,13 +5,12 @@ package com.bonc.dx.crawler_manage.task.crawler.xl;
 import com.bonc.dx.crawler_manage.pool.driver.ChromeDriverPool;
 import com.bonc.dx.crawler_manage.task.crawler.CommonUtil;
 import com.bonc.dx.crawler_manage.task.crawler.Crawler;
+import com.bonc.dx.crawler_manage.task.crawler.xl.sub.BjGgzyfwCrawllerUsePool;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -52,7 +51,7 @@ public class BjGgzyfwCrawller implements Crawler {
 
 
 
-    public static List<Map<String,String>> initUrlInfo(){
+    public List<Map<String,String>> initUrlInfo(){
         List<Map<String,String>> list = new ArrayList<>(5);
         Map<String,String> map1 = new HashMap<>(2);
         Map<String,String> map2 = new HashMap<>(2);

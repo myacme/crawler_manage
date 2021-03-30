@@ -4,6 +4,7 @@ package com.bonc.dx.crawler_manage.task.crawler.xl;
 import com.bonc.dx.crawler_manage.pool.driver.ChromeDriverPool;
 import com.bonc.dx.crawler_manage.task.crawler.CommonUtil;
 import com.bonc.dx.crawler_manage.task.crawler.Crawler;
+import com.bonc.dx.crawler_manage.task.crawler.xl.sub.HljGgzyjywCrawllerUsePool;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -28,7 +29,8 @@ public class HljGgzyjywCrawller implements Crawler {
     CommonUtil commonUtil;
     @Autowired
     ChromeDriverPool driverPool;
-    @Autowired HljGgzyjywCrawllerUsePool hljGgzyjywCrawllerUsePool;
+    @Autowired
+    HljGgzyjywCrawllerUsePool hljGgzyjywCrawllerUsePool;
 
     private static Logger log = LoggerFactory.getLogger(HljGgzyjywCrawller.class);
     private static final String URL_PREFIX = "http://hljggzyjyw.gov.cn";

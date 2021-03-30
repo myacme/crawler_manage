@@ -1,4 +1,4 @@
-package com.bonc.dx.crawler_manage.task.crawler.xl;
+package com.bonc.dx.crawler_manage.task.crawler.xl.sub;
 
 import com.bonc.dx.crawler_manage.entity.CrawlerEntity;
 import com.bonc.dx.crawler_manage.pool.driver.ChromeDriverPool;
