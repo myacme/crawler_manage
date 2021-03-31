@@ -35,14 +35,13 @@ public class CCGPQINGHAICrawller implements Crawler {
 
 
 	private static Logger log = LoggerFactory.getLogger(CCGPQINGHAICrawller.class);
-	private static long ct = 0;
-	private static boolean isNext = true;
+	private  boolean isNext = true;
 	//测试用表
 	private static final String TABLE_NAME = "data_ccgp_henan_info";
 	private static final String SOURCE = "青海省政府采购网";
 	private static final String CITY = "青海省";
-	private static String begin_time;
-	private static String end_time;
+	private  String begin_time;
+	private  String end_time;
 	private int key = -1;
 	public String initUrl = "";
 	private String type = "";

@@ -35,16 +35,16 @@ public class SHGGZYCrawller implements Crawler {
 
 
 	private static Logger log = LoggerFactory.getLogger(SHGGZYCrawller.class);
-	private static long ct = 0;
-	private static boolean isNext = true;
+	private  long ct = 0;
+	private  boolean isNext = true;
 	//测试用表
 	private static final String TABLE_NAME = "data_ccgp_henan_info";
 	private static final String SOURCE = "全国公共资源交易平台-上海市";
 	private static final String CITY = "上海市";
-	private static String begin_time;
-	private static String end_time;
+	private  String begin_time;
+	private  String end_time;
 	private int key = -1;
-	public String initUrl = "";
+	private String initUrl = "";
 	public static  final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 	private static String reg1 = "https://www.shggzy.com/jyxxgc/index.jhtml";
 	private static String reg2 = "https://www.shggzy.com/jyxxtd/index.jhtml";

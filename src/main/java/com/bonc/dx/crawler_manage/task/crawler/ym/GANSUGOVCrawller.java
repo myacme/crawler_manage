@@ -34,14 +34,14 @@ public class GANSUGOVCrawller implements Crawler {
 
 
 	private static Logger log = LoggerFactory.getLogger(GANSUGOVCrawller.class);
-	private static long ct = 0;
-	private static boolean isNext = true;
+	private  long ct = 0;
+	private  boolean isNext = true;
 	//测试用表
 	private static final String TABLE_NAME = "data_ccgp_henan_info";
 	private static final String SOURCE = "甘肃省公共资源交易局";
 	private static final String CITY = "甘肃省";
-	private static String begin_time;
-	private static String end_time;
+	private  String begin_time;
+	private  String end_time;
 	public static  final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 	private static String reg = "https://ggzyjy.gansu.gov.cn/f/newprovince/annogoods/list";
 //	private static String reg = "http://search.ccgp.gov.cn/bxsearch?searchtype=1&page_index=138&bidSort=&buyerName=&projectId=&pinMu=&bidType=&dbselect=bidx&kw=&start_time=2021%3A01%3A26&end_time=2021%3A02%3A02&timeType=2&displayZone=&zoneId=&pppStatus=0&agentName=";
