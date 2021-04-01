@@ -82,8 +82,8 @@ public class CCGPQINGHAICrawller implements Crawler {
 		String table_name = commonUtil.getTableName();
 		try {
 
-			end_time = days.get("start");
-            begin_time = days.get("end");
+			begin_time = days.get("start");
+			end_time = days.get("end");
 
 
 //			List<WebElement> left = driver.findElements(By.cssSelector("ul.type-list > li > a"));

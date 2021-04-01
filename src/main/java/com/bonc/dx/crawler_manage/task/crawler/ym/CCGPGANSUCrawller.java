@@ -76,8 +76,8 @@ public class CCGPGANSUCrawller implements Crawler {
 			driver.get(reg);
 			Thread.sleep(2000);
 
-			end_time = days.get("start");
-            begin_time = days.get("end");
+			begin_time = days.get("start");
+			end_time = days.get("end");
 
 //			driver.findElement(By.cssSelector("#stime")).clear();
 //			driver.findElement(By.cssSelector("#stime")).sendKeys(begin_time);

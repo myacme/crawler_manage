@@ -84,8 +84,8 @@ public class SHGGZYCrawller implements Crawler {
 		WebDriver driver2 = driverPool.get();
 		String table_name = commonUtil.getTableName();
 		try {
-			end_time = days.get("start");
-            begin_time = days.get("end");
+			begin_time = days.get("start");
+			end_time = days.get("end");
 			for (int i = 0; i < 16; i++) {
 				setUrl(i);
 				driver.get(initUrl);

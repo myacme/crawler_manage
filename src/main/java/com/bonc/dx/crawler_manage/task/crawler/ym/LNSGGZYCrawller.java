@@ -70,8 +70,8 @@ public class LNSGGZYCrawller implements Crawler {
 			driver.get(reg);
 			Thread.sleep(2000);
 
-			end_time = days.get("start");
-            begin_time = days.get("end");
+			begin_time = days.get("start");
+			end_time = days.get("end");
 
 				isNext = true;
 

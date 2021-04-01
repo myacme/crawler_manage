@@ -69,8 +69,8 @@ public class GANSUGOVCrawller implements Crawler {
 			driver.get(reg);
 			Thread.sleep(6000);
 
-			end_time = days.get("start");
-            begin_time = days.get("end");
+			begin_time = days.get("start");
+			end_time = days.get("end");
 
 //			driver.findElement(By.cssSelector("#stime")).clear();
 //			driver.findElement(By.cssSelector("#stime")).sendKeys(begin_time);

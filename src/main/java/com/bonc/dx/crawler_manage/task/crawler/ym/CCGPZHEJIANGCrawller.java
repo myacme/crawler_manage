@@ -17,6 +17,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 
@@ -57,7 +58,6 @@ public class CCGPZHEJIANGCrawller implements Crawler {
 
 
 	public void runTest() {
-		Map<String,String> days = commonUtil.getDays(Thread.currentThread().getStackTrace()[1].getClassName());
 		WebDriver driver = driverPool.get();
 		WebDriver driver2 = driverPool.get();
 		String table_name = commonUtil.getTableName();
@@ -65,8 +65,17 @@ public class CCGPZHEJIANGCrawller implements Crawler {
 			driver.get(reg);
 			Thread.sleep(3000);
 
-			end_time = days.get("start");
-            begin_time = days.get("end");
+			Map<String,String> days = commonUtil.getDays(Thread.currentThread().getStackTrace()[1].getClassName());
+			begin_time = days.get("start");
+			end_time = days.get("end");
+
+			/*Calendar calendar= Calendar.getInstance();
+			calendar.add(Calendar.MONTH, -1);
+			calendar.set(Calendar.DAY_OF_MONTH, 1);
+			begin_time = simpleDateFormat.format(calendar.getTime());
+			calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
+			end_time = simpleDateFormat.format(calendar.getTime());*/
+
 			List<WebElement> h3s = driver.findElements(By.cssSelector("div.gpoz-nav > div > h3"));
 			List<WebElement> uls = driver.findElements(By.cssSelector("div.gpoz-nav > div > ul"));
 			for (int i = 0; i < uls.size(); i++) {
