@@ -1,6 +1,7 @@
 package com.bonc.dx.crawler_manage.task.crawler.xl;
 
 import com.bonc.dx.crawler_manage.pool.driver.ChromeDriverPool;
+import com.bonc.dx.crawler_manage.service.CommonService;
 import com.bonc.dx.crawler_manage.task.crawler.CommonUtil;
 import com.bonc.dx.crawler_manage.task.crawler.Crawler;
 import com.bonc.dx.crawler_manage.task.crawler.xl.sub.BjGgzyfwCrawllerUsePool;
@@ -24,6 +25,8 @@ public class DealGGzyCrawler implements Crawler {
     @Autowired
     CommonUtil commonUtil;
 
+    @Autowired
+    CommonService commonService;
 
     @Autowired
     DealGGzyCrawlerUserPool dealGGzyCrawlerUserPool;
@@ -40,9 +43,15 @@ public class DealGGzyCrawler implements Crawler {
         Map<String,String> days = commonUtil.getDays(Thread.currentThread().getStackTrace()[1].getClassName());
 
         List<Map<String,String>> types = initType();
-        for(Map<String,String> map : types){
-            dealGGzyCrawlerUserPool.run(map,days);
+        try {
+            for(Map<String,String> map : types){
+                dealGGzyCrawlerUserPool.run(map,days);
+            }
+            commonService.insertLogInfo("全国公共资源交易平台",DealGGzyCrawler.class.getName(),"success","");
+        }catch ( Exception e){
+            commonService.insertLogInfo("全国公共资源交易平台",DealGGzyCrawler.class.getName(),"error",e.getMessage());
         }
+
 
     }
 

@@ -92,8 +92,10 @@ public class HtgsCcgpCrawler implements Crawler {
 
             Thread.sleep(10000);
             getData(driver, origin);
+            commonService.insertLogInfo("中国政府采购网",HtgsCcgpCrawler.class.getName(),"success","");
         } catch (Exception e) {
             e.printStackTrace();
+            commonService.insertLogInfo("中国政府采购网",HtgsCcgpCrawler.class.getName(),"error",e.getMessage());
         } finally {
             if(driver != null){
                 driverPool.release(driver);
