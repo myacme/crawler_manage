@@ -35,16 +35,16 @@ public class QHGGZYJYGOVCrawller implements Crawler {
 
 
 	private static Logger log = LoggerFactory.getLogger(QHGGZYJYGOVCrawller.class);
-	private static long ct = 0;
-	private static boolean isNext = true;
+	private  long ct = 0;
+	private  boolean isNext = true;
 	//测试用表
 	private static final String TABLE_NAME = "data_ccgp_henan_info";
-	private static final String SOURCE = "青海省政府采购网";
+	private static final String SOURCE = "全国公共资源交易平台-青海省";
 	private static final String CITY = "青海省";
-	private static String begin_time;
-	private static String end_time;
+	private  String begin_time;
+	private  String end_time;
 	private int key = -1;
-	public String initUrl = "";
+	private String initUrl = "";
 	private String type = "";
 	public static  final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 	private static String reg1 = "https://www.qhggzyjy.gov.cn/ggzy/jyxx/001001/001001001/secondPage.html";
@@ -73,8 +73,8 @@ public class QHGGZYJYGOVCrawller implements Crawler {
 		String table_name = commonUtil.getTableName();
 		try {
 
-			end_time = days.get("start");
-            begin_time = days.get("end");
+			begin_time = days.get("start");
+			end_time = days.get("end");
 
 
 //			List<WebElement> left = driver.findElements(By.cssSelector("ul.type-list > li > a"));
@@ -138,7 +138,6 @@ public class QHGGZYJYGOVCrawller implements Crawler {
 							List<WebElement> elements = driver.findElements(By.cssSelector("#pager > ul > li"));
 							WebElement next = null;
 							for (int j = 0; j < elements.size(); j++) {
-								WebElement element = elements.get(j);
 								if (elements.get(j).getAttribute("class") != null && elements.get(j).getAttribute("class").equals("active")){
 									if (j==elements.size()-1){
 										isNext = false;

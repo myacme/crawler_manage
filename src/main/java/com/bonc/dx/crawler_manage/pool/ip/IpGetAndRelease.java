@@ -72,8 +72,9 @@ public class IpGetAndRelease {
     public static Object releaseIp(String url){
 
         HttpClient httpClient = HttpClientBuilder.create().build();
-        HttpPost post = new HttpPost(url);
+        HttpPost post = null;
         try {
+            post = new HttpPost(url);
             //http
             HttpResponse response = httpClient.execute(post);
 
@@ -96,7 +97,9 @@ public class IpGetAndRelease {
 
         } finally {
             try {
-                post.releaseConnection();
+                if (post != null) {
+                    post.releaseConnection();
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }

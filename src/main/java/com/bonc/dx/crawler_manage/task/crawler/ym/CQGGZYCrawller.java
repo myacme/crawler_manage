@@ -34,14 +34,14 @@ public class CQGGZYCrawller implements Crawler {
 
 
 	private static Logger log = LoggerFactory.getLogger(CQGGZYCrawller.class);
-	private static long ct = 0;
-	private static boolean isNext = true;
+	private  long ct = 0;
+	private  boolean isNext = true;
 	//测试用表
 	private static final String TABLE_NAME = "data_ccgp_henan_info";
 	private static final String SOURCE = "重庆市万州区公共资源交易信息网";
 	private static final String CITY = "重庆市";
-	private static String begin_time;
-	private static String end_time;
+	private  String begin_time;
+	private  String end_time;
 	public static  final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 	private static String reg = "https://www.cqggzy.com/jyxx/jyxx-page.html";
 //	private static String reg = "http://search.ccgp.gov.cn/bxsearch?searchtype=1&page_index=138&bidSort=&buyerName=&projectId=&pinMu=&bidType=&dbselect=bidx&kw=&start_time=2021%3A01%3A26&end_time=2021%3A02%3A02&timeType=2&displayZone=&zoneId=&pppStatus=0&agentName=";
@@ -69,8 +69,8 @@ public class CQGGZYCrawller implements Crawler {
 			driver.get(reg);
 			Thread.sleep(5000);
 
-			end_time = days.get("start");
-            begin_time = days.get("end");
+			begin_time = days.get("start");
+			end_time = days.get("end");
 
 			isNext = true;
 			while (true) {
