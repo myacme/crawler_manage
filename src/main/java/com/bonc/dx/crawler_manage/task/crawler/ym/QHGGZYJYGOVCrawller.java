@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author ym
@@ -70,9 +71,10 @@ public class QHGGZYJYGOVCrawller implements Crawler {
 		WebDriver driver = driverPool.get();
 //		chromeOptions2.addArguments("--headless --no-sandbox\n".split(" "));
 		WebDriver driver2 = driverPool.get();
-		String table_name = commonUtil.getTableName();
+		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+		driver2.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
 		try {
-
+			String table_name = commonUtil.getTableName();
 			begin_time = days.get("start");
 			end_time = days.get("end");
 

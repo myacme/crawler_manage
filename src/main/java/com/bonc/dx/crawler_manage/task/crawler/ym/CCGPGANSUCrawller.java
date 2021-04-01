@@ -71,8 +71,10 @@ public class CCGPGANSUCrawller implements Crawler {
 		WebDriver driver = driverPool.get();
 //		chromeOptions2.addArguments("--headless --no-sandbox\n".split(" "));
 		WebDriver driver2 = driverPool.get();
-		String table_name = commonUtil.getTableName();
+		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+		driver2.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
 		try {
+			String table_name = commonUtil.getTableName();
 			driver.get(reg);
 			Thread.sleep(2000);
 

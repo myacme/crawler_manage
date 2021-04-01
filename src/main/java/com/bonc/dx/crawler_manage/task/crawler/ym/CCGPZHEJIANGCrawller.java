@@ -20,6 +20,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author ym
@@ -60,8 +61,11 @@ public class CCGPZHEJIANGCrawller implements Crawler {
 	public void runTest() {
 		WebDriver driver = driverPool.get();
 		WebDriver driver2 = driverPool.get();
-		String table_name = commonUtil.getTableName();
+
+		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+		driver2.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
 		try {
+			String table_name = commonUtil.getTableName();
 			driver.get(reg);
 			Thread.sleep(3000);
 
@@ -150,8 +154,8 @@ public class CCGPZHEJIANGCrawller implements Crawler {
 								insertMap.setSource(SOURCE);
 								insertMap.setIsCrawl("1");
 //								System.out.println("=====================" + insertMap.toString());
-								commonService.insertTable(insertMap, TABLE_NAME);
-//								commonService.insertTable(insertMap, table_name);
+//								commonService.insertTable(insertMap, TABLE_NAME);
+								commonService.insertTable(insertMap, table_name);
 							} else {
 								isNext = false;
 							}

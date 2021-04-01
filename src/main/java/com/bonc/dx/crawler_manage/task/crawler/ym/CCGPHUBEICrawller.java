@@ -24,10 +24,10 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * @author ym
- * @date 2021-3-24 16:28:29
+ * @date 2021-4-1 11:03:52
  */
 @Component
-public class SHGGZYCrawller implements Crawler {
+public class CCGPHUBEICrawller implements Crawler {
 
 	@Autowired
 	ChromeDriverPool driverPool;
@@ -35,34 +35,20 @@ public class SHGGZYCrawller implements Crawler {
 	CommonService commonService;
 
 
-	private static Logger log = LoggerFactory.getLogger(SHGGZYCrawller.class);
+	private static Logger log = LoggerFactory.getLogger(CCGPHUBEICrawller.class);
 	private  long ct = 0;
 	private  boolean isNext = true;
 	//测试用表
 	private static final String TABLE_NAME = "data_ccgp_henan_info";
-	private static final String SOURCE = "全国公共资源交易平台-上海市";
-	private static final String CITY = "上海市";
+	private static final String SOURCE = "湖北省政府采购网-青海省";
+	private static final String CITY = "湖北省";
 	private  String begin_time;
 	private  String end_time;
 	private int key = -1;
 	private String initUrl = "";
+	private String type = "";
 	public static  final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-	private static String reg1 = "https://www.shggzy.com/jyxxgc/index.jhtml";
-	private static String reg2 = "https://www.shggzy.com/jyxxtd/index.jhtml";
-	private static String reg3 = "https://www.shggzy.com/jyxxzc/index.jhtml";
-	private static String reg4 = "https://www.shggzy.com/jyxxcq/index.jhtml";
-	private static String reg5 = "https://www.shggzy.com/jyxxjd/index.jhtml";
-	private static String reg6 = "https://www.shggzy.com/jyxxjs/index.jhtml";
-	private static String reg7 = "https://www.shggzy.com/jyxxtpf/index.jhtml";
-	private static String reg8 = "https://www.shggzy.com/jyxxncys/index.jhtml";
-	private static String reg9 = "https://www.shggzy.com/jyxxnc/index.jhtml";
-	private static String reg10 = "https://www.shggzy.com/jyxxpm/index.jhtml";
-	private static String reg11 = "https://www.shggzy.com/jyxxyp/index.jhtml";
-	private static String reg12 = "https://www.shggzy.com/jyxxwzcg/index.jhtml";
-	private static String reg13 = "https://www.shggzy.com/jyxxwtl/index.jhtml";
-	private static String reg14 = "https://www.shggzy.com/jyxxtyj/index.jhtml";
-	private static String reg15 = "https://www.shggzy.com/jyxxny/index.jhtml";
-	private static String reg16 = "https://www.shggzy.com/jyxxzf/index.jhtml";
+	private static String reg1 = "http://www.ccgp-hubei.gov.cn/notice/cggg/pzgysgg/index_1.html";
 //	private static String reg = "http://search.ccgp.gov.cn/bxsearch?searchtype=1&page_index=138&bidSort=&buyerName=&projectId=&pinMu=&bidType=&dbselect=bidx&kw=&start_time=2021%3A01%3A26&end_time=2021%3A02%3A02&timeType=2&displayZone=&zoneId=&pppStatus=0&agentName=";
 
 	@Autowired
@@ -83,25 +69,31 @@ public class SHGGZYCrawller implements Crawler {
 		WebDriver driver = driverPool.get();
 //		chromeOptions2.addArguments("--headless --no-sandbox\n".split(" "));
 		WebDriver driver2 = driverPool.get();
-
-		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+		driver.manage().timeouts().implicitlyWait(15, TimeUnit.SECONDS);
 		driver2.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
-
 		try {
 			String table_name = commonUtil.getTableName();
 			begin_time = days.get("start");
 			end_time = days.get("end");
-			for (int i = 0; i < 16; i++) {
-				setUrl(i);
+
+
+//			List<WebElement> left = driver.findElements(By.cssSelector("ul.type-list > li > a"));
+//			List<String> lfurls = new ArrayList<>();
+//			List<Map<String,String>> lfurls = new ArrayList<>();
+			for (int i = 0; i < 14; i++) {
+				//更新url和type
+				this.setUrl(i);
+
 				driver.get(initUrl);
 				Thread.sleep(2000);
 
 				isNext = true;
+
 					while (true) {
 						List<WebElement> lis = new ArrayList<>();
 
 						try {
-							lis = driver.findElements(By.cssSelector("div.gui-title-bottom > ul > li"));
+							lis = driver.findElements(By.cssSelector(".news-list-content > li"));
 						}catch (Exception ue){
 							isNext = false;
 						}
@@ -112,13 +104,14 @@ public class SHGGZYCrawller implements Crawler {
 //						System.out.println("lis.size:"+lis.size());
 //						System.out.println("type:"+type);
 						for (WebElement li : lis) {
-							String url = li.getAttribute("onclick").replace("window.open('","").replace("')","");
+							String url = li.findElement(By.cssSelector("a")).getAttribute("href");
 
-							String title = li.findElement(By.cssSelector("span.cs-span2")).getText().replace("\"","").replace(" ","");
-							String date = li.findElement(By.cssSelector("span:last-child")).getText();
+							String title = li.findElement(By.cssSelector("a")).getText();
+							System.out.println("title:"+title);
+							String font = li.findElement(By.cssSelector("a > font")).getText();
+							title = title.replace(font,"").replace("[","").replace("]","").replace("\"","");
+							String date = li.findElement(By.cssSelector("span")).getText();
 							System.out.println("date:"+date);
-//							String date = doc.select("span.feed-time").text().replace("发布时间：","")
-//									.replace("年","-").replace("月","-").replace("日","");
 							if (!date.equals("") && simpleDateFormat.parse(end_time).before(simpleDateFormat.parse(date))) {
 								//结束时间在爬取到的时间之前 就下一个
 								continue;
@@ -130,9 +123,7 @@ public class SHGGZYCrawller implements Crawler {
 								driver2.get(url);
 								Thread.sleep(1000);
 								Document doc = Jsoup.parse(driver2.getPageSource());
-								String content = doc.select("div.content").text();
-								String type = doc.select("div.crumbs_top > span:nth-child(5) > a").text();
-
+								String content = doc.select(".art_con").text();
 								//加入实体类 入库
 								CrawlerEntity insertMap = new CrawlerEntity();
 								insertMap.setUrl( url);
@@ -152,22 +143,23 @@ public class SHGGZYCrawller implements Crawler {
 						}
 						if (isNext) {
 							log.info(driver.getCurrentUrl());
-							WebElement next = driver.findElement(By.cssSelector("#page > div > a:nth-last-child(2)"));
-							if ("layui-laypage-next layui-disabled".equals(next.getAttribute("class"))){
+							WebElement next = driver.findElement(By.cssSelector("ul.pagination > li:nth-last-child(3)"));
+
+							if (next.getAttribute("class") != null && next.getAttribute("class").equals("disabled")){
 								break;
 							}
-							next.click();
-							Thread.sleep(1000);
+							next.findElement(By.cssSelector("a")).click();
+							Thread.sleep(500);
 						} else {
 							break;
 						}
 					}
 
 			}
-			commonService.insertLogInfo(SOURCE,SHGGZYCrawller.class.getName(),"success","");
+			commonService.insertLogInfo(SOURCE,CCGPHUBEICrawller.class.getName(),"success","");
 		} catch (Exception e) {
 			e.printStackTrace();
-			commonService.insertLogInfo(SOURCE,SHGGZYCrawller.class.getName(),"error",e.getMessage());
+			commonService.insertLogInfo(SOURCE,CCGPHUBEICrawller.class.getName(),"error",e.getMessage());
 		} finally {
 			if(driver != null){
 				driverPool.release(driver);
@@ -179,60 +171,71 @@ public class SHGGZYCrawller implements Crawler {
 		System.out.println("exit");
 	}
 
+
 	public void setUrl(int index) {
 		key = index;
 		switch (index) {
 			case 0:
-				initUrl = reg1;
+				initUrl = "http://www.ccgp-hubei.gov.cn/notice/cggg/pzgysgg/index_1.html";
+				type = "资格预审公告";
 				break;
 			case 1:
-				initUrl = reg2;
+				initUrl = "http://www.ccgp-hubei.gov.cn/notice/cggg/pzbgg/index_1.html";
+				type = "招标(采购)公告";
 				break;
 			case 2:
-				initUrl = reg3;
+				initUrl = "http://www.ccgp-hubei.gov.cn/notice/cggg/pzhbgg/index_1.html";
+				type = "中标(成交)公告";
 				break;
 			case 3:
-				initUrl = reg4;
+				initUrl = "http://www.ccgp-hubei.gov.cn/notice/cggg/pgzgg/index_1.html";
+				type = "更正公告";
 				break;
 			case 4:
-				initUrl = reg5;
+				initUrl = "http://www.ccgp-hubei.gov.cn/notice/cggg/pfbgg/index_1.html";
+				type = "终止公告";
 				break;
 			case 5:
-				initUrl = reg6;
+				initUrl = "http://www.ccgp-hubei.gov.cn/notice/cggg/pdylygg/index_1.html";
+				type = "单一来源采购公示";
 				break;
 			case 6:
-				initUrl = reg7;
+				initUrl = "http://www.ccgp-hubei.gov.cn/notice/cggg/pxqgsgg/index_1.html";
+				type = "需求公示(征询意见)";
 				break;
 			case 7:
-				initUrl = reg8;
+				initUrl = "http://www.ccgp-hubei.gov.cn/notice/cggg/czgysgg/index_1.html";
+				type = "资格预审公告";
 				break;
 			case 8:
-				initUrl = reg9;
+				initUrl = "http://www.ccgp-hubei.gov.cn/notice/cggg/czbgg/index_1.html";
+				type = "招标(采购)公告";
 				break;
 			case 9:
-				initUrl = reg10;
+				initUrl = "http://www.ccgp-hubei.gov.cn/notice/cggg/czhbgg/index_1.html";
+				type = "中标(成交)公告";
 				break;
 			case 10:
-				initUrl = reg11;
+				initUrl = "http://www.ccgp-hubei.gov.cn/notice/cggg/cgzgg/index_1.html";
+				type = "更正公告";
 				break;
 			case 11:
-				initUrl = reg12;
+				initUrl = "http://www.ccgp-hubei.gov.cn/notice/cggg/cfbgg/index_1.html";
+				type = "终止公告";
 				break;
 			case 12:
-				initUrl = reg13;
+				initUrl = "http://www.ccgp-hubei.gov.cn/notice/cggg/cdylygg/index_1.html";
+				type = "单一来源采购公示";
 				break;
 			case 13:
-				initUrl = reg14;
-				break;
-			case 14:
-				initUrl = reg15;
-				break;
-			case 15:
-				initUrl = reg16;
+				initUrl = "http://www.ccgp-hubei.gov.cn/notice/cggg/cxqgsgg/index_1.html";
+				type = "需求公示(征询意见)";
 				break;
 			default:
 				break;
 		}
 	}
+
+
 }
 

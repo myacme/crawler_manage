@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author ym
@@ -65,8 +66,10 @@ public class LNSGGZYCrawller implements Crawler {
 		WebDriver driver = driverPool.get();
 //		chromeOptions2.addArguments("--headless --no-sandbox\n".split(" "));
 		WebDriver driver2 = driverPool.get();
-		String table_name = commonUtil.getTableName();
+		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+		driver2.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
 		try {
+			String table_name = commonUtil.getTableName();
 			driver.get(reg);
 			Thread.sleep(2000);
 
@@ -113,8 +116,8 @@ public class LNSGGZYCrawller implements Crawler {
 								insertMap.setSource(SOURCE);
 								insertMap.setIsCrawl("1");
 //								System.out.println("=====================" + insertMap.toString());
-								commonService.insertTable(insertMap, TABLE_NAME);
-//								commonService.insertTable(insertMap, table_name);
+//								commonService.insertTable(insertMap, TABLE_NAME);
+								commonService.insertTable(insertMap, table_name);
 							} else {
 								isNext = false;
 							}
