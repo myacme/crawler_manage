@@ -1,23 +1,16 @@
 package com.bonc.dx.crawler_manage.task.crawler.xl;
 
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+
 import com.bonc.dx.crawler_manage.entity.CrawlerEntity;
 import com.bonc.dx.crawler_manage.pool.driver.ChromeDriverPool;
 import com.bonc.dx.crawler_manage.service.CommonService;
 import com.bonc.dx.crawler_manage.task.crawler.CommonUtil;
 import com.bonc.dx.crawler_manage.task.crawler.Crawler;
-import com.bonc.dx.crawler_manage.task.crawler.xl.sub.BjGgzyfwCrawllerUsePool;
-import com.bonc.dx.crawler_manage.util.HtmlUtil;
+
+
 import com.bonc.dx.crawler_manage.util.ffcode.Api;
-import com.bonc.dx.crawler_manage.util.ffcode.Util;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -27,12 +20,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-import java.io.ByteArrayOutputStream;
+
 import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.net.URL;
-import java.net.URLConnection;
-import java.nio.charset.StandardCharsets;
+
 import java.util.Arrays;
 import java.util.Map;
 
@@ -122,19 +112,12 @@ public class HtgsCcgpCrawler implements Crawler {
                     "&code=#{code}";
 
 
-//            driver.get(imageUrl);
-
-//            byte[] imgData = driver.getPageSource().getBytes(StandardCharsets.UTF_8);
-
-
 
             Api api = new Api();
             api.Init2();
             String pred_type = "30400";
             String codeString = api.PredictExtend(pred_type, GetUrlImage(imageUrl));
 
-//            System.out.println(imgData);
-//            String codeString = api.PredictExtend(pred_type, imgData);
             System.out.println(codeString);
 
             driver.get(url1.replace("#{codeResult}",code)
@@ -193,7 +176,7 @@ public class HtgsCcgpCrawler implements Crawler {
                     entity.setContent(Jsoup.parse(driver.getPageSource()).text());
 
                     System.out.println(entity);
-                    commonService.insert(entity);
+                    commonService.insertTable(entity,commonUtil.getTableName());
                     Thread.sleep(1000 * 10 + (int) (Math.random() * 1000));
                 }catch (Exception e){
                     e.printStackTrace();

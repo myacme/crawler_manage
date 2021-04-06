@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.bonc.dx.crawler_manage.entity.CrawlerEntity;
 import com.bonc.dx.crawler_manage.service.CommonService;
+import com.bonc.dx.crawler_manage.task.crawler.CommonUtil;
 import com.bonc.dx.crawler_manage.util.HtmlUtil;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -23,6 +24,8 @@ public class DealGGzyCrawlerUserPool {
 
     @Autowired
     CommonService commonService;
+    @Autowired
+    CommonUtil commonUtil;
 
     public  HttpClient httpClient = HttpClientBuilder.create().build();
 
@@ -104,7 +107,7 @@ public class DealGGzyCrawlerUserPool {
                             get2.releaseConnection();
                         }
                         //保存数据
-                        commonService.insert(entity);
+                        commonService.insertTable(entity,commonUtil.getTableName());
                         try {
                             Thread.sleep(10000);
 

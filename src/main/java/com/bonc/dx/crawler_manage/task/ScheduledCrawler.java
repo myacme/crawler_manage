@@ -15,7 +15,7 @@ public class ScheduledCrawler {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    @Scheduled(cron = "0 12 15  * * ?")
+    @Scheduled(cron = "0 00 2  * * ?")
     public void execute() {
         System.out.println("====================定时启动=================");
         ApplicationContext applicationContext = SpringUtil.getApplicationContext();
