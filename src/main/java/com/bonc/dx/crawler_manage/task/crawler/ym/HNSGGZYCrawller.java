@@ -7,6 +7,8 @@ import com.bonc.dx.crawler_manage.task.crawler.CommonUtil;
 import com.bonc.dx.crawler_manage.task.crawler.Crawler;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -27,7 +29,7 @@ import java.util.concurrent.TimeUnit;
  * @date 2021-4-1 11:09:02
  */
 @Component
-public class SXGGZYJYCrawller implements Crawler {
+public class HNSGGZYCrawller implements Crawler {
 
 	@Autowired
 	ChromeDriverPool driverPool;
@@ -35,27 +37,19 @@ public class SXGGZYJYCrawller implements Crawler {
 	CommonService commonService;
 
 
-	private static Logger log = LoggerFactory.getLogger(SXGGZYJYCrawller.class);
+	private static Logger log = LoggerFactory.getLogger(HNSGGZYCrawller.class);
 	private  long ct = 0;
 	private  boolean isNext = true;
 	//测试用表
 	private static final String TABLE_NAME = "data_ccgp_henan_info";
-	private static final String SOURCE = "全国公共资源交易平台-陕西省";
-	private static final String CITY = "陕西省";
+	private static final String SOURCE = "全国公共资源交易平台-湖南省";
+	private static final String CITY = "湖南省";
 	private  String begin_time;
 	private  String end_time;
 	private int key = -1;
 	private String initUrl = "";
 	public static  final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-	private static String reg1 = "http://www.sxggzyjy.cn/jydt/001001/001001001/subPage_jyxx.html";
-	private static String reg2 = "http://www.sxggzyjy.cn/jydt/001001/001001002/subPage_jyxx.html";
-	private static String reg3 = "http://www.sxggzyjy.cn/jydt/001001/001001003/subPage_jyxx.html";
-	private static String reg4 = "http://www.sxggzyjy.cn/jydt/001001/001001004/subPage_jyxx.html";
-	private static String reg5 = "http://www.sxggzyjy.cn/jydt/001001/001001006/subPage_jyxx.html";
-	private static String reg6 = "http://www.sxggzyjy.cn/jydt/001001/001001008/subPage_jyxx.html";
-	private static String reg7 = "http://www.sxggzyjy.cn/jydt/001001/001001013/subPage_jyxx.html";
-	private static String reg8 = "http://www.sxggzyjy.cn/jydt/001001/001001014/subPage_jyxx.html";
-	private static String reg9 = "http://www.sxggzyjy.cn/jydt/001001/001001012/subPage_jyxx.html";
+	private static String reg1 = "https://www.hnsggzy.com/gczb/index.jhtml";
 //	private static String reg = "http://search.ccgp.gov.cn/bxsearch?searchtype=1&page_index=138&bidSort=&buyerName=&projectId=&pinMu=&bidType=&dbselect=bidx&kw=&start_time=2021%3A01%3A26&end_time=2021%3A02%3A02&timeType=2&displayZone=&zoneId=&pppStatus=0&agentName=";
 
 	@Autowired
@@ -82,33 +76,31 @@ public class SXGGZYJYCrawller implements Crawler {
 			String table_name = commonUtil.getTableName();
 			begin_time = days.get("start");
 			end_time = days.get("end");
-			for (int i = 0; i < 9; i++) {
+//			begin_time = "2021-03-26";
+//			end_time = "2021-04-06";
+			for (int i = 0; i < 13; i++) {
+				if (i==5){
+					//医药采购类
+					continue;
+				}
 				setUrl(i);
 				driver.get(initUrl);
-				Thread.sleep(1000);
+				Thread.sleep(5000);
 				isNext = true;
 					while (true) {
-						List<WebElement> lis = new ArrayList<>();
-						WebElement div = driver.findElement(By.cssSelector("#categorypagingcontent"));
-						try {
-							lis = div.findElements(By.cssSelector("ul.ewb-list > li"));
-						}catch (Exception ue){
-							isNext = false;
-						}
+						Document doc1 = Jsoup.parse(driver.getPageSource());
+						Elements lis = doc1.select("ul.article-list2 > li");
 						if (lis.size() == 0 ){
 							isNext = false;
 						}
-//						String type = driver.findElement(By.cssSelector("#gonggao_type")).getText();
-//						System.out.println("lis.size:"+lis.size());
-//						System.out.println("type:"+type);
-						for (WebElement li : lis) {
-							String url = li.findElement(By.cssSelector("a")).getAttribute("href");
+						for (Element li : lis) {
+							String url = li.select(("div.article-list3-t > a")).attr("href");
 
-							String title = li.findElement(By.cssSelector("a")).getAttribute("title");
-							String date = li.findElement(By.cssSelector("span")).getText();
+							String title = li.select("div.article-list3-t > a").text();
+							String date = li.select("div.article-list3-t > div.list-times").text();
 							System.out.println("date:"+date);
-//							String date = doc.select("span.feed-time").text().replace("发布时间：","")
-//									.replace("年","-").replace("月","-").replace("日","");
+							String type = li.select("div.article-list3-t2 > div:nth-child(2)").text().replace("信息类型：","");
+
 							if (!date.equals("") && simpleDateFormat.parse(end_time).before(simpleDateFormat.parse(date))) {
 								//结束时间在爬取到的时间之前 就下一个
 								continue;
@@ -118,10 +110,9 @@ public class SXGGZYJYCrawller implements Crawler {
 //							DbUtil.insertdataZGZFCGW(insertMap);
 								//详情页面爬取content  单独开窗口
 								driver2.get(url);
-								Thread.sleep(1000);
+								Thread.sleep(5000);
 								Document doc = Jsoup.parse(driver2.getPageSource());
-								String content = doc.select("#mainContent").text();
-								String type = doc.select("#viewGuid").text();
+								String content = doc.select("div.div-article2").text();
 
 								//加入实体类 入库
 								CrawlerEntity insertMap = new CrawlerEntity();
@@ -144,7 +135,7 @@ public class SXGGZYJYCrawller implements Crawler {
 							log.info(driver.getCurrentUrl());
 							WebElement next;
 							try {
-								next = driver.findElements(By.cssSelector(".ewb-page-li.ewb-page-hover")).get(1).findElement(By.cssSelector("a"));
+								next = driver.findElement(By.cssSelector("ul.pages-list > li:nth-last-child(3) > a"));
 							}catch (Exception enext){
 								break;
 							}
@@ -156,10 +147,10 @@ public class SXGGZYJYCrawller implements Crawler {
 					}
 
 			}
-			commonService.insertLogInfo(SOURCE,SXGGZYJYCrawller.class.getName(),"success","");
+			commonService.insertLogInfo(SOURCE,HNSGGZYCrawller.class.getName(),"success","");
 		} catch (Exception e) {
 			e.printStackTrace();
-			commonService.insertLogInfo(SOURCE,SXGGZYJYCrawller.class.getName(),"error",e.getMessage());
+			commonService.insertLogInfo(SOURCE,HNSGGZYCrawller.class.getName(),"error",e.getMessage());
 		} finally {
 			if(driver != null){
 				driverPool.release(driver);
@@ -175,31 +166,43 @@ public class SXGGZYJYCrawller implements Crawler {
 		key = index;
 		switch (index) {
 			case 0:
-				initUrl = reg1;
+				initUrl = "https://www.hnsggzy.com/gczb/index.jhtml";
 				break;
 			case 1:
-				initUrl = reg2;
+				initUrl = "https://www.hnsggzy.com/jygkzfcg/index.jhtml";
 				break;
 			case 2:
-				initUrl = reg3;
+				initUrl = "https://www.hnsggzy.com/jygktd/index.jhtml";
 				break;
 			case 3:
-				initUrl = reg4;
+				initUrl = "https://www.hnsggzy.com/jygkkyq/index.jhtml";
 				break;
 			case 4:
-				initUrl = reg5;
+				initUrl = "https://www.hnsggzy.com/cqjy/index.jhtml";
 				break;
 			case 5:
-				initUrl = reg6;
+				initUrl = "https://www.hnsggzy.com/yycg/index.jhtml";
 				break;
 			case 6:
-				initUrl = reg7;
+				initUrl = "https://www.hnsggzy.com/jygkqt/index.jhtml";
 				break;
 			case 7:
-				initUrl = reg8;
+				initUrl = "https://www.hnsggzy.com/xxxm/index.jhtml";
 				break;
 			case 8:
-				initUrl = reg9;
+				initUrl = "https://www.hnsggzy.com/blwgjztb/index.jhtml";
+				break;
+			case 9:
+				initUrl = "https://www.hnsggzy.com/lqjy/index.jhtml";
+				break;
+			case 10:
+				initUrl = "https://www.hnsggzy.com/pwqjy/index.jhtml";
+				break;
+			case 11:
+				initUrl = "https://www.hnsggzy.com/tpfjy/index.jhtml";
+				break;
+			case 12:
+				initUrl = "https://www.hnsggzy.com/tdzb/index.jhtml";
 				break;
 			default:
 				break;

@@ -99,9 +99,9 @@ public class SHGGZYCrawller implements Crawler {
 				isNext = true;
 					while (true) {
 						List<WebElement> lis = new ArrayList<>();
-
+						WebElement ul = driver.findElement(By.cssSelector("div.gui-title-bottom > ul "));
 						try {
-							lis = driver.findElements(By.cssSelector("div.gui-title-bottom > ul > li"));
+							lis = ul.findElements(By.cssSelector("li"));
 						}catch (Exception ue){
 							isNext = false;
 						}
@@ -128,7 +128,7 @@ public class SHGGZYCrawller implements Crawler {
 //							DbUtil.insertdataZGZFCGW(insertMap);
 								//详情页面爬取content  单独开窗口
 								driver2.get(url);
-								Thread.sleep(1000);
+								Thread.sleep(1000+(int) (Math.random()*3000));
 								Document doc = Jsoup.parse(driver2.getPageSource());
 								String content = doc.select("div.content").text();
 								String type = doc.select("div.crumbs_top > span:nth-child(5) > a").text();

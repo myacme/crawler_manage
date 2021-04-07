@@ -92,9 +92,9 @@ public class HBGGZYFWPTCrawller implements Crawler {
 
 					while (true) {
 						List<WebElement> lis = new ArrayList<>();
-
+						WebElement div = driver.findElement(By.cssSelector("div.newListwenzi "));
 						try {
-							lis = driver.findElements(By.cssSelector("div.newListwenzi > table > tbody > tr"));
+							lis = div.findElements(By.cssSelector("table > tbody > tr"));
 						}catch (Exception ue){
 							isNext = false;
 						}
@@ -119,7 +119,7 @@ public class HBGGZYFWPTCrawller implements Crawler {
 //							DbUtil.insertdataZGZFCGW(insertMap);
 								//详情页面爬取content  单独开窗口
 								driver2.get(url);
-								Thread.sleep(1000);
+								Thread.sleep(8000);
 								Document doc = Jsoup.parse(driver2.getPageSource());
 								String content = doc.select("#detailNeirong").text();
 								//加入实体类 入库

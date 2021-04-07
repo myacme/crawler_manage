@@ -91,9 +91,9 @@ public class CCGPHUBEICrawller implements Crawler {
 
 					while (true) {
 						List<WebElement> lis = new ArrayList<>();
-
+						WebElement ul = driver.findElement(By.cssSelector(".news-list-content "));
 						try {
-							lis = driver.findElements(By.cssSelector(".news-list-content > li"));
+							lis = ul.findElements(By.cssSelector("li"));
 						}catch (Exception ue){
 							isNext = false;
 						}
