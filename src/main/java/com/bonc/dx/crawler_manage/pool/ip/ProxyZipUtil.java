@@ -140,13 +140,13 @@ public class ProxyZipUtil {
             String path2 = path1.replace(".zip","_temp.zip");
             File file = new File(path1);
             if(file.exists()){
-//                获取新ip
-//                String ip = IpGetAndRelease.getIp(System.getProperty("ipGetUrl"));
-//                System.out.println("ip:" + ip);
-//                //更新代理文件
-//                String oldIp = updateZipFile(path1,path2,ip);
-//                System.out.println("oldIp:" + oldIp);
-//                IpGetAndRelease.releaseIp(System.getProperty("ipReleaseUrl") + oldIp);
+                //获取新ip
+                String ip = IpGetAndRelease.getIp(System.getProperty("ipGetUrl"));
+                System.out.println("ip:" + ip);
+                //更新代理文件
+                String oldIp = updateZipFile(path1,path2,ip);
+                System.out.println("oldIp:" + oldIp);
+                IpGetAndRelease.releaseIp(System.getProperty("ipReleaseUrl") + oldIp);
             }
         }
 
