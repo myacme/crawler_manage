@@ -101,7 +101,7 @@ public class CCGPJIANGXICrawller implements Crawler {
 								//结束时间在爬取到的时间之前 就下一个
 								isNext = true;
 								continue;
-							}else if (begin_time == null || !simpleDateFormat.parse(date).before(simpleDateFormat.parse(begin_time))) {
+							}else if (!date.equals("") && (begin_time == null || !simpleDateFormat.parse(date).before(simpleDateFormat.parse(begin_time)))) {
 								//begin_time为null代表爬取全量的  或者 开始时间 小于等于 爬取到的时间之前
 								isNext = true;
 //							DbUtil.insertdataZGZFCGW(insertMap);

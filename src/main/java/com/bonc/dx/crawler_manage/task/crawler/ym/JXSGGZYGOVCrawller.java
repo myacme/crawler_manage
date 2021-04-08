@@ -82,7 +82,7 @@ public class JXSGGZYGOVCrawller implements Crawler {
 //			List<WebElement> left = driver.findElements(By.cssSelector("ul.type-list > li > a"));
 //			List<String> lfurls = new ArrayList<>();
 //			List<Map<String,String>> lfurls = new ArrayList<>();
-			for (int i = 0; i < 23; i++) {
+			for (int i = 0; i < 25; i++) {
 				//更新url和type
 				setUrl(i);
 
@@ -118,7 +118,7 @@ public class JXSGGZYGOVCrawller implements Crawler {
 								//结束时间在爬取到的时间之前 就下一个
 								isNext = true;
 								continue;
-							}else if (begin_time == null || !simpleDateFormat.parse(date).before(simpleDateFormat.parse(begin_time))) {
+							}else if (!date.equals("") && (begin_time == null || !simpleDateFormat.parse(date).before(simpleDateFormat.parse(begin_time)))) {
 								//begin_time为null代表爬取全量的  或者 开始时间 小于等于 爬取到的时间之前
 								isNext = true;
 //							DbUtil.insertdataZGZFCGW(insertMap);
@@ -273,6 +273,14 @@ public class JXSGGZYGOVCrawller implements Crawler {
 			case 22:
 				initUrl = "https://jxsggzy.cn/web/jyxx/002013/002013002/jyxx.html";
 				type = "成交公示";
+				break;
+			case 23:
+				initUrl = "https://jxsggzy.cn/web/jyxx/002002/002002006/jyxx.html";
+				type = "招标计划";
+				break;
+			case 24:
+				initUrl = "https://jxsggzy.cn/web/jyxx/002006/002006007/jyxx.html";
+				type = "采购意向";
 				break;
 			default:
 				break;
