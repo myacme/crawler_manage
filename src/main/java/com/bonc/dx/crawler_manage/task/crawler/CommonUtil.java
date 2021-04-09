@@ -45,7 +45,10 @@ public class CommonUtil {
 
     //获取当前需要存的表名(启动时间跑前一天的数据，所以表名后缀是昨天的日期)
     public String getTableName(){
-        return taskConfService.getConfValue("table_name_prefix","all")+DateUtil.getDate("yyyyMMdd");
+        String time = DateUtil.getDate("yyyy-MM-dd HH:mm:ss");
+        String table_name = taskConfService.getConfValue("table_name_prefix", "all") + DateUtil.getDate("yyyyMMdd");
+        taskConfService.insertNameLog(time,table_name);
+        return table_name;
     }
 
 }

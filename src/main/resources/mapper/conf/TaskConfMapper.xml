@@ -11,4 +11,12 @@
             and state = '1'
     </select>
 
+    <insert id="insertNameLog">
+        insert into name_log(time,table_name)
+        VALUES (
+        #{time}
+        ,#{table_name}
+        )
+    </insert>
+
 </mapper>

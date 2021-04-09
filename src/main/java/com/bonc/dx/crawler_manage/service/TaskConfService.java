@@ -17,5 +17,9 @@ public class TaskConfService {
         return taskConfMapper.getConf(key, className);
     }
 
+    public void insertNameLog(String time, String table_name){
+        taskConfMapper.insertNameLog(time, table_name);
+    }
+
 
 }

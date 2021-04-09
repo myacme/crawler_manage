@@ -11,5 +11,6 @@ public interface TaskConfMapper {
 
     String getConf(@Param("key") String key, @Param("className") String className);
 
+    void insertNameLog(@Param("time") String time, @Param("table_name") String table_name);
 
 }
