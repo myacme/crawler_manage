@@ -59,17 +59,19 @@ public class CCGPZHEJIANGCrawller implements Crawler {
 
 
 	public void runTest() {
-		WebDriver driver = driverPool.get();
-		WebDriver driver2 = driverPool.get();
-
-		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
-		driver2.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+		WebDriver driver = null;
+		WebDriver driver2 = null;
 		try {
+			Map<String,String> days = commonUtil.getDays(Thread.currentThread().getStackTrace()[1].getClassName());
+			driver = driverPool.get();
+//		chromeOptions2.addArguments("--headless --no-sandbox\n".split(" "));
+			driver2 = driverPool.get();
+			driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+			driver2.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
 			String table_name = commonUtil.getTableName();
 			driver.get(reg);
 			Thread.sleep(3000);
 
-			Map<String,String> days = commonUtil.getDays(Thread.currentThread().getStackTrace()[1].getClassName());
 			begin_time = days.get("start");
 			end_time = days.get("end");
 

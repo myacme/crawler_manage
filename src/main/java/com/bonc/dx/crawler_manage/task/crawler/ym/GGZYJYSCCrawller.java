@@ -61,13 +61,15 @@ public class GGZYJYSCCrawller implements Crawler {
 
 
 	public void runTest() {
-		Map<String,String> days = commonUtil.getDays(Thread.currentThread().getStackTrace()[1].getClassName());
-		WebDriver driver = driverPool.get();
-//		chromeOptions2.addArguments("--headless --no-sandbox\n".split(" "));
-		WebDriver driver2 = driverPool.get();
-		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
-		driver2.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+		WebDriver driver = null;
+		WebDriver driver2 = null;
 		try {
+			Map<String,String> days = commonUtil.getDays(Thread.currentThread().getStackTrace()[1].getClassName());
+			driver = driverPool.get();
+//		chromeOptions2.addArguments("--headless --no-sandbox\n".split(" "));
+			driver2 = driverPool.get();
+			driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+			driver2.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
 			String table_name = commonUtil.getTableName();
 			driver.get(reg);
 			Thread.sleep(2000);
