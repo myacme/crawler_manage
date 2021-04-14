@@ -99,7 +99,7 @@ public class CCGPJIANGXICrawller implements Crawler {
 							String title = li.findElement(By.cssSelector("a")).getText();
 							String date = li.findElement(By.cssSelector("span.ewb-list-date")).getText();
 							System.out.println("date:"+date);
-							if (!date.equals("") && simpleDateFormat.parse(end_time).before(simpleDateFormat.parse(date))) {
+							if (date.equals("") || !date.contains("-") || simpleDateFormat.parse(end_time).before(simpleDateFormat.parse(date))) {
 								//结束时间在爬取到的时间之前 就下一个
 								isNext = true;
 								continue;

@@ -103,7 +103,7 @@ public class HNSGGZYCrawller implements Crawler {
 							System.out.println("date:"+date);
 							String type = li.select("div.article-list3-t2 > div:nth-child(2)").text().replace("信息类型：","");
 
-							if (!date.equals("") && simpleDateFormat.parse(end_time).before(simpleDateFormat.parse(date))) {
+							if (date.equals("") || !date.contains("-") || simpleDateFormat.parse(end_time).before(simpleDateFormat.parse(date))) {
 								//结束时间在爬取到的时间之前 就下一个
 								continue;
 							}else if (!date.equals("") && (begin_time == null || !simpleDateFormat.parse(date).before(simpleDateFormat.parse(begin_time)))) {

@@ -117,7 +117,7 @@ public class CCGPSICHUANCrawller implements Crawler {
 							String date2 = date.substring(2,9);
 							date = date2+"-"+date1;
 							System.out.println("date:"+date);
-							if (!date.equals("") && simpleDateFormat.parse(end_time).before(simpleDateFormat.parse(date))) {
+							if (date.equals("") || !date.contains("-") || simpleDateFormat.parse(end_time).before(simpleDateFormat.parse(date))) {
 								//结束时间在爬取到的时间之前 就下一个
 								continue;
 							}else if (!date.equals("") && (begin_time == null || !simpleDateFormat.parse(date).before(simpleDateFormat.parse(begin_time)))) {

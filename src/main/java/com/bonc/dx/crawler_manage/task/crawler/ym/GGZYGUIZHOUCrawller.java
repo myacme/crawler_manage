@@ -93,7 +93,7 @@ public class GGZYGUIZHOUCrawller implements Crawler {
 							String type = li.findElement(By.cssSelector("div.xxqb_box2lbfbt > a:last-child")).getText().replace("公告类型：","");
 //							String date = doc.select("span.feed-time").text().replace("发布时间：","")
 //									.replace("年","-").replace("月","-").replace("日","");
-							if (!date.equals("") && simpleDateFormat.parse(end_time).before(simpleDateFormat.parse(date))) {
+							if (date.equals("") || !date.contains("-") || simpleDateFormat.parse(end_time).before(simpleDateFormat.parse(date))) {
 								//结束时间在爬取到的时间之前 就下一个
 								continue;
 							}else if (!date.equals("") && (begin_time == null || !simpleDateFormat.parse(date).before(simpleDateFormat.parse(begin_time)))) {
