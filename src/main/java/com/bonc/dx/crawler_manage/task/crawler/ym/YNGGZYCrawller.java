@@ -8,7 +8,6 @@ import com.bonc.dx.crawler_manage.task.crawler.Crawler;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
@@ -25,10 +24,10 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * @author ym
- * @date 2021-4-1 11:09:02
+ * @date 2021-4-1 11:03:52
  */
 @Component
-public class GGZYAHCrawller implements Crawler {
+public class YNGGZYCrawller implements Crawler {
 
 	@Autowired
 	ChromeDriverPool driverPool;
@@ -36,27 +35,20 @@ public class GGZYAHCrawller implements Crawler {
 	CommonService commonService;
 
 
-	private static Logger log = LoggerFactory.getLogger(GGZYAHCrawller.class);
+	private static Logger log = LoggerFactory.getLogger(YNGGZYCrawller.class);
 	private  long ct = 0;
 	private  boolean isNext = true;
 	//测试用表
 	private static final String TABLE_NAME = "data_ccgp_henan_info";
-	private static final String SOURCE = "全国公共资源交易平台-陕西省";
-	private static final String CITY = "陕西省";
+	private static final String SOURCE = "云南省公共资源交易中心";
+	private static final String CITY = "云南省";
 	private  String begin_time;
 	private  String end_time;
 	private int key = -1;
 	private String initUrl = "";
+	private String type = "";
 	public static  final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-	private static String reg1 = "http://ggzy.ah.gov.cn/jsgc/list?tenderProjectType=A01";
-	private static String reg2 = "http://ggzy.ah.gov.cn/jsgc/list?tenderProjectType=A07";
-	private static String reg3 = "http://ggzy.ah.gov.cn/jsgc/list?tenderProjectType=AAA";
-	private static String reg4 = "http://ggzy.ah.gov.cn/jsgc/list?tenderProjectType=A99";
-	private static String reg5 = "http://ggzy.ah.gov.cn/zfcg/list";
-	private static String reg6 = "http://ggzy.ah.gov.cn/cqjy/list";
-	private static String reg7 = "http://ggzy.ah.gov.cn/kyqcr/list";
-	private static String reg8 = "http://ggzy.ah.gov.cn/ppp/list";
-	private static String reg9 = "http://ggzy.ah.gov.cn/qtjy/list";
+	private static String reg1 = "https://www.ynggzy.com/";
 //	private static String reg = "http://search.ccgp.gov.cn/bxsearch?searchtype=1&page_index=138&bidSort=&buyerName=&projectId=&pinMu=&bidType=&dbselect=bidx&kw=&start_time=2021%3A01%3A26&end_time=2021%3A02%3A02&timeType=2&displayZone=&zoneId=&pppStatus=0&agentName=";
 
 	@Autowired
@@ -80,35 +72,35 @@ public class GGZYAHCrawller implements Crawler {
 			driver = driverPool.get();
 //		chromeOptions2.addArguments("--headless --no-sandbox\n".split(" "));
 			driver2 = driverPool.get();
-			driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+			driver.manage().timeouts().implicitlyWait(15, TimeUnit.SECONDS);
 			driver2.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
 			String table_name = commonUtil.getTableName();
 			begin_time = days.get("start");
 			end_time = days.get("end");
-			for (int i = 0; i < 9; i++) {
-				setUrl(i);
-				driver.get(initUrl);
-//				driver.manage().window().maximize();
-//				JavascriptExecutor js = (JavascriptExecutor) driver;
-				Thread.sleep(1000);
-				List<WebElement> selects = driver.findElements(By.cssSelector("#search1 > div:nth-child(3) > div.btn-group.select_box > ul.dropdown-menu > li > a"));
-				for (int j = 0; j < selects.size(); j++) {
-					driver.findElements(By.cssSelector("span.caret")).get(0).click();
-					WebElement select = selects.get(j);
-					String type = select.getText();
-					/*String href = select.getAttribute("href").replace("javascript:", "").replace(";", "");
-					js.executeScript(href);*/
-					select.click();
-					Thread.sleep(1000);
-					driver.findElement(By.cssSelector("button.btn")).click();
-					Thread.sleep(2000);
 
-					isNext = true;
+
+//			List<WebElement> left = driver.findElements(By.cssSelector("ul.type-list > li > a"));
+//			List<String> lfurls = new ArrayList<>();
+//			List<Map<String,String>> lfurls = new ArrayList<>();
+			for (int i = 0; i < 18; i++) {
+				if (i==14){
+					continue;
+				}
+				//更新url和type
+				this.setUrl(i);
+				int num = 1;
+
+				isNext = true;
+
 					while (true) {
+
+						driver.get(initUrl+"?currentPage="+num);
+						Thread.sleep(2000);
+
 						List<WebElement> lis = new ArrayList<>();
-						WebElement ul = driver.findElement(By.cssSelector("div.list.clear >ul:last-child "));
+						WebElement div = driver.findElement(By.cssSelector("#data_tab "));
 						try {
-							lis = ul.findElements(By.cssSelector("li.list-item"));
+							lis = div.findElements(By.cssSelector("tbody > tr"));
 						}catch (Exception ue){
 							isNext = false;
 						}
@@ -118,41 +110,39 @@ public class GGZYAHCrawller implements Crawler {
 //						String type = driver.findElement(By.cssSelector("#gonggao_type")).getText();
 //						System.out.println("lis.size:"+lis.size());
 //						System.out.println("type:"+type);
+						int isfirst = 0;
 						for (WebElement li : lis) {
-							String url = li.findElement(By.cssSelector("a")).getAttribute("href");
-							String title = li.findElement(By.cssSelector("a > span.title")).getAttribute("title");
-							String date = li.findElement(By.cssSelector("span.date")).getText();
+							//跳过第一行表头
+							if (isfirst == 0){
+								isfirst++;
+								continue;
+							}
+							String url = li.findElement(By.cssSelector("td > a")).getAttribute("href");
+
+							String title = li.findElement(By.cssSelector("td > a")).getAttribute("title");
+							String date = li.findElement(By.cssSelector("td:last-child")).getText();
+							if (i>14){
+								//20171018090000
+								date = date.substring(0,4)+"-"+date.substring(4,6)+"-"+date.substring(6,8);
+							}
 							System.out.println("date:"+date);
-//							String date = doc.select("span.feed-time").text().replace("发布时间：","")
-//									.replace("年","-").replace("月","-").replace("日","");
 							if (date.equals("") || !date.contains("-") || simpleDateFormat.parse(end_time).before(simpleDateFormat.parse(date))) {
 								//结束时间在爬取到的时间之前 就下一个
+								isNext = true;
 								continue;
 							}else if (!date.equals("") && (begin_time == null || !simpleDateFormat.parse(date).before(simpleDateFormat.parse(begin_time)))) {
 								//begin_time为null代表爬取全量的  或者 开始时间 小于等于 爬取到的时间之前
-
-								if (!url.equals("http://ggzy.ah.gov.cn/jsgc/newDetail?guid=716DD52A-5525-4ECA-93C4-8F70FFF090ED&tenderProjectType=A99&bulletinNature=3")){
-									continue;
-								}
+								isNext = true;
 //							DbUtil.insertdataZGZFCGW(insertMap);
 								//详情页面爬取content  单独开窗口
 								driver2.get(url);
-								Thread.sleep(1000);
-								try {
-									driver2.findElement(By.cssSelector("div.article-mid-title.m-b-40 > a")).click();
-									Thread.sleep(2000);
-								}catch (Exception ed2){
-
-								}
+								Thread.sleep(2000);
 								Document doc = Jsoup.parse(driver2.getPageSource());
-								String content = doc.text();
-
-								if (content.contains("此流程暂无信息")){
-									content = "此流程暂无信息";
+								String content = doc.select("div.detail_contect").text();
+								if (content == null || content.equals("")) {
+									content = doc.select("div.page_contect.bai_bg").text();
 								}
-								if (content.contains("Loading")){
-									Thread.sleep(5000);
-									doc = Jsoup.parse(driver2.getPageSource());
+								if (content == null || content.equals("")) {
 									content = doc.text();
 								}
 								//加入实体类 入库
@@ -174,23 +164,31 @@ public class GGZYAHCrawller implements Crawler {
 						}
 						if (isNext) {
 							log.info(driver.getCurrentUrl());
-							WebElement next = driver.findElement(By.cssSelector("div.mmggxlh > a:last-child"));
-							if (next.getAttribute("onclick") == null) {
-								break;
+							WebElement next = null;
+							List<WebElement> elements = driver.findElements(By.cssSelector("div.mmggxlh > a"));
+							for (WebElement element : elements) {
+
+								if (element.getText().contains("下一页")){
+									next = element;
+								}
 							}
-							next.click();
+
+							if (next == null || next.getAttribute("onclick") == null){
+								break;
+							}else {
+								num++;
+							}
 							Thread.sleep(500);
 						} else {
 							break;
 						}
 					}
-					selects = driver.findElements(By.cssSelector("#search1 > div:nth-child(3) > div.btn-group.select_box > ul.dropdown-menu > li > a"));
-				}
+
 			}
-			commonService.insertLogInfo(SOURCE,GGZYAHCrawller.class.getName(),"success","");
+			commonService.insertLogInfo(SOURCE,YNGGZYCrawller.class.getName(),"success","");
 		} catch (Exception e) {
 			e.printStackTrace();
-			commonService.insertLogInfo(SOURCE,GGZYAHCrawller.class.getName(),"error",e.getMessage());
+			commonService.insertLogInfo(SOURCE,YNGGZYCrawller.class.getName(),"error",e.getMessage());
 		} finally {
 			if(driver != null){
 				driverPool.release(driver);
@@ -202,39 +200,87 @@ public class GGZYAHCrawller implements Crawler {
 		System.out.println("exit");
 	}
 
+
 	public void setUrl(int index) {
 		key = index;
 		switch (index) {
 			case 0:
-				initUrl = reg1;
+				initUrl = "https://www.ynggzy.com/jyxx/jsgcZbgg";
+				type = "招标公告";
 				break;
 			case 1:
-				initUrl = reg2;
+				initUrl = "https://www.ynggzy.com/jyxx/jsgcpbjggs";
+				type = "评标结果公示";
 				break;
 			case 2:
-				initUrl = reg3;
+				initUrl = "https://www.ynggzy.com/jyxx/jsgcZbjggs";
+				type = "https://www.ynggzy.com/jyxx/jsgcZbjggs";
 				break;
 			case 3:
-				initUrl = reg4;
+				initUrl = "https://www.ynggzy.com/jyxx/jsgcZbyc";
+				type = "异常公告";
 				break;
 			case 4:
-				initUrl = reg5;
+				initUrl = "https://www.ynggzy.com/jyxx/zfcg/cggg";
+				type = "采购公告";
 				break;
 			case 5:
-				initUrl = reg6;
+				initUrl = "https://www.ynggzy.com/jyxx/zfcg/gzsx";
+				type = "变更通知";
 				break;
 			case 6:
-				initUrl = reg7;
+				initUrl = "https://www.ynggzy.com/jyxx/zfcg/zbjggs";
+				type = "结果公示";
 				break;
 			case 7:
-				initUrl = reg8;
+				initUrl = "https://www.ynggzy.com/jyxx/zfcg/htgs";
+				type = "合同公示";
 				break;
 			case 8:
-				initUrl = reg9;
+				initUrl = "https://www.ynggzy.com/jyxx/zfcg/zfcgYcgg";
+				type = "异常公告";
+				break;
+			case 9:
+				initUrl = "https://www.ynggzy.com/jyxx/kyqcr/zpgCrgg";
+				type = "招拍挂出让公告";
+				break;
+			case 10:
+				initUrl = "https://www.ynggzy.com/jyxx/kyqcr/bytz";
+				type = "招拍挂补遗通知";
+				break;
+			case 11:
+				initUrl = "https://www.ynggzy.com/jyxx/kyqcr/zpgCrjggs";
+				type = "招拍挂出让结果公示";
+				break;
+			case 12:
+				initUrl = "https://www.ynggzy.com/jyxx/cqjy/crgg";
+				type = "挂牌公告";
+				break;
+			case 13:
+				initUrl = "https://www.ynggzy.com/jyxx/cqjy/bytz";
+				type = "补遗通知";
+				break;
+			case 14:
+				initUrl = "https://www.ynggzy.com/jyxx/cqjy/cjqr";
+				type = "交易结果";
+				break;
+			case 15:
+				initUrl = "https://www.ynggzy.com/jyxx/qtjy/crgg";
+				type = "交易公告";
+				break;
+			case 16:
+				initUrl = "https://www.ynggzy.com/jyxx/qtjy/bgtz";
+				type = "变更公告";
+				break;
+			case 17:
+				initUrl = "https://www.ynggzy.com/jyxx/qtjy/cjqr";
+				type = "结果公示";
 				break;
 			default:
 				break;
 		}
 	}
+
+
 }
 

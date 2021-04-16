@@ -88,7 +88,7 @@ public class HAINANGOVCrawller implements Crawler {
 
 				driver.get(initUrl);
 				Thread.sleep(2000);
-				driver.manage().window().maximize();
+//				driver.manage().window().maximize();
 				isNext = true;
 
 					while (true) {
