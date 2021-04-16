@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 阻塞队列实现一个池
@@ -60,8 +61,11 @@ public class ChromeDriverPool implements DriverPool{
         ChromeOptions chromeOptions = new ChromeOptions();
         File file = proxyZipUtil.getZip(path);
         chromeOptions.addExtensions(file);
+        //最大化
+        chromeOptions.addArguments("start-maximized");
         WebDriver driver = new ChromeDriver(chromeOptions);
-
+        //设置3分钟超时时间
+        driver.manage().timeouts().pageLoadTimeout(180 , TimeUnit. SECONDS);
         queue.offer(driver);
     }
 
