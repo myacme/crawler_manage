@@ -64,8 +64,8 @@ public class ChromeDriverPool implements DriverPool{
         //最大化
         chromeOptions.addArguments("start-maximized");
         WebDriver driver = new ChromeDriver(chromeOptions);
-        //设置3分钟超时时间
-        driver.manage().timeouts().pageLoadTimeout(180 , TimeUnit. SECONDS);
+        //设置5分钟超时时间
+        driver.manage().timeouts().pageLoadTimeout(300 , TimeUnit. SECONDS);
         queue.offer(driver);
     }
 
