@@ -16,7 +16,7 @@ public class InitSystemProperty {
 
     public void init(){
         initProperties();
-        initProxyZip();
+//        initProxyZip();
         String chromedriver = System.getProperty("chromedriver");
         System.setProperty("webdriver.chrome.driver", chromedriver);
         System.setProperty("webdriver.chrome.bin", "./");

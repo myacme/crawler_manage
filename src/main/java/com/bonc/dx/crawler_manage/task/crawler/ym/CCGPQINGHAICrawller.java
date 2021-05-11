@@ -1,15 +1,15 @@
 package com.bonc.dx.crawler_manage.task.crawler.ym;
 
 import com.alibaba.fastjson.JSONObject;
+import com.bonc.dx.crawler_manage.entity.ChromeDriverPro;
 import com.bonc.dx.crawler_manage.entity.CrawlerEntity;
-import com.bonc.dx.crawler_manage.pool.driver.ChromeDriverPool;
+import com.bonc.dx.crawler_manage.pool.driver.ProxyChromeDriverPool;
 import com.bonc.dx.crawler_manage.service.CommonService;
 import com.bonc.dx.crawler_manage.task.crawler.CommonUtil;
 import com.bonc.dx.crawler_manage.task.crawler.Crawler;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 public class CCGPQINGHAICrawller implements Crawler {
 
 	@Autowired
-	ChromeDriverPool driverPool;
+	ProxyChromeDriverPool driverPool;
 	@Autowired
 	CommonService commonService;
 
@@ -76,8 +76,8 @@ public class CCGPQINGHAICrawller implements Crawler {
 
 
 	public void runTest() {
-		WebDriver driver = null;
-		WebDriver driver2 = null;
+		ChromeDriverPro driver = null;
+		ChromeDriverPro driver2 = null;
 		try {
 			Map<String,String> days = commonUtil.getDays(Thread.currentThread().getStackTrace()[1].getClassName());
 			driver = driverPool.get();
