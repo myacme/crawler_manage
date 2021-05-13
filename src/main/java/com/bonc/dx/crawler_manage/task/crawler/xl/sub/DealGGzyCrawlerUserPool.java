@@ -109,7 +109,8 @@ public class DealGGzyCrawlerUserPool {
                             get2.releaseConnection();
                         }
                         //保存数据
-                        commonService.insertTable(entity,commonUtil.getTableName());
+//                        commonService.insertTable(entity,commonUtil.getTableName());
+                        commonService.insertTable(entity,"bj_bidweb64_info_20210309_20210421");
                         try {
                             Thread.sleep(10000);
 

@@ -1,9 +1,12 @@
 package com.bonc.dx.crawler_manage.task;
 
+import com.bonc.dx.crawler_manage.pool.driver.InitSystemProperty;
+import com.bonc.dx.crawler_manage.pool.driver.ProxyChromeDriverPool;
 import com.bonc.dx.crawler_manage.task.crawler.Crawler;
 import com.bonc.dx.crawler_manage.util.SpringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -13,7 +16,7 @@ import java.util.Map;
 @Component
 public class ScheduledCrawler {
 
-    private Logger logger = LoggerFactory.getLogger(getClass());
+	private Logger logger = LoggerFactory.getLogger(getClass());
 
     @Scheduled(cron = "0 0 2 * * ?")
     public void execute() {
@@ -26,7 +29,6 @@ public class ScheduledCrawler {
 //            if(entry.getKey().equals("GANSUGOVCrawller")){
                 crawlers.get(entry.getKey()).run();
 //            }
-        }
-    }
-
+		}
+	}
 }

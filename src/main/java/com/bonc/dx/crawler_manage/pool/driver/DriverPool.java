@@ -1,11 +1,11 @@
 package com.bonc.dx.crawler_manage.pool.driver;
 
-import org.openqa.selenium.WebDriver;
+import com.bonc.dx.crawler_manage.entity.ChromeDriverPro;
 
 public interface DriverPool {
 
-    WebDriver get();
+    ChromeDriverPro get();
 
-    void release(WebDriver driver);
+    void release(ChromeDriverPro driver);
 
 }
