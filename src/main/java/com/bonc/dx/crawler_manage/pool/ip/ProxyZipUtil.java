@@ -94,11 +94,10 @@ public class ProxyZipUtil {
 	}
 
 
-
 	/**
 	 * 读取压缩文件ip
 	 *
-	 * @param inputName
+	 * @param
 	 * @throws IOException
 	 */
 	public static String getIp(int i) {
@@ -206,10 +205,12 @@ public class ProxyZipUtil {
 			//获取新ip
 			ip = IpGetAndRelease.getIp(System.getProperty("ipGetUrl"));
 			System.out.println("ip:" + ip);
-			//更新代理文件
-			String oldIp = updateZipFile(path1, path2, ip);
-			System.out.println("oldIp:" + oldIp);
-			IpGetAndRelease.releaseIp(System.getProperty("ipReleaseUrl") + oldIp);
+			if (!ip.contains("code")) {
+				//更新代理文件
+				String oldIp = updateZipFile(path1, path2, ip);
+				System.out.println("oldIp: " + oldIp);
+				IpGetAndRelease.releaseIp(System.getProperty("ipReleaseUrl") + oldIp);
+			}
 		}
 		return ip;
 	}

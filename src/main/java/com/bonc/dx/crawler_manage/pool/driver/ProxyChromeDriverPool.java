@@ -65,17 +65,17 @@ public class ProxyChromeDriverPool implements DriverPool {
 		//获取driver前验证ip是否可用
 		while (true) {
 			try {
-				log.info("代理driver池 获取一个资源，现有 : {}", queue.size());
 				driver = queue.take();
 				try {
 					//验证ip是否可用
 					driver.get("https://www.baidu.com");
+					log.info("代理driver池 获取一个资源，现有 : {}", queue.size());
 					return driver;
 				} catch (Exception e) {
 					e.printStackTrace();
 					log.info("代理driver池 一个资源失效，现有 : {}", queue.size());
 					//重新申请ip
-					add(new ProxyZipUtil(), 1);
+					add(new ProxyZipUtil(), driver.getIndex());
 					log.info("代理driver池 新增一个资源，现有 : {}", queue.size());
 				}
 			} catch (Exception e) {
