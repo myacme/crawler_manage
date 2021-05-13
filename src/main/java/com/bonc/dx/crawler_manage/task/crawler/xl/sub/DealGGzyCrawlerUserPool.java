@@ -112,7 +112,7 @@ public class DealGGzyCrawlerUserPool {
 //                        commonService.insertTable(entity,commonUtil.getTableName());
                         commonService.insertTable(entity,"bj_bidweb64_info_20210309_20210421");
                         try {
-                            Thread.sleep(10000);
+                            Thread.sleep(500);
 
                         }catch (Exception e2){
                             e2.printStackTrace();
