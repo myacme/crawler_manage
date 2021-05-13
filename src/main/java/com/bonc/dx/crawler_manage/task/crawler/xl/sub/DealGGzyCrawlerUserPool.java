@@ -72,6 +72,8 @@ public class DealGGzyCrawlerUserPool {
                         String type =  urlInfo.get("type");
                         String source = "全国公共资源交易网";
                         String urlDetail = ((JSONObject)e).getString("url");
+                        //替换详情页url  爬取正确content 访问也更快
+                        urlDetail = urlDetail.replace("html/a/", "html/b/");
                         String city = ((JSONObject)e).getString("districtShow");
 
 
