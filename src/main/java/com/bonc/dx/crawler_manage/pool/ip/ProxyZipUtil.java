@@ -204,8 +204,8 @@ public class ProxyZipUtil {
 		if (file.exists()) {
 			//获取新ip
 			ip = IpGetAndRelease.getIp(System.getProperty("ipGetUrl"));
-			System.out.println("ip:" + ip);
-			if (!ip.contains("code")) {
+			System.out.println("ip: " + ip);
+			if (!ip.contains("false")) {
 				//更新代理文件
 				String oldIp = updateZipFile(path1, path2, ip);
 				System.out.println("oldIp: " + oldIp);
