@@ -5,8 +5,6 @@ import com.bonc.dx.crawler_manage.pool.ip.IpGetAndRelease;
 import com.bonc.dx.crawler_manage.pool.ip.ProxyZipUtil;
 import org.openqa.selenium.Proxy;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.remote.CapabilityType;
-import org.openqa.selenium.remote.DesiredCapabilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.DependsOn;
@@ -97,20 +95,18 @@ public class ProxyChromeDriverPool implements DriverPool {
 		chromeOptions.addExtensions(file);
 		//最大化
 		chromeOptions.addArguments("start-maximized");
-
 		/*设置新的代理模式*/
-		String proxyIpAndPort= ip;
-		DesiredCapabilities cap = new DesiredCapabilities();
-		Proxy proxy=new Proxy();
-		proxy.setHttpProxy(proxyIpAndPort).setFtpProxy(proxyIpAndPort).setSslProxy(proxyIpAndPort);
-		cap.setCapability(CapabilityType.ForSeleniumServer.AVOIDING_PROXY, true);
-		cap.setCapability(CapabilityType.ForSeleniumServer.ONLY_PROXYING_SELENIUM_TRAFFIC, true);
-		cap.setCapability(ChromeOptions.CAPABILITY, chromeOptions);
-		System.setProperty("http.nonProxyHosts", "localhost");
-		cap.setCapability(CapabilityType.PROXY, proxy);
-
-
-		ChromeDriverPro driver = new ChromeDriverPro(cap);
+		String proxyIpAndPort = ip;
+		Proxy proxy = new Proxy();
+		proxy.setHttpProxy(ip).setFtpProxy(ip).setSslProxy(ip);
+		chromeOptions.setProxy(proxy);
+//		DesiredCapabilities cap = new DesiredCapabilities();
+//		cap.setCapability(CapabilityType.ForSeleniumServer.AVOIDING_PROXY, true);
+//		cap.setCapability(CapabilityType.ForSeleniumServer.ONLY_PROXYING_SELENIUM_TRAFFIC, true);
+//		cap.setCapability(ChromeOptions.CAPABILITY, chromeOptions);
+//		System.setProperty("http.nonProxyHosts", "localhost");
+//		cap.setCapability(CapabilityType.PROXY, proxy);
+		ChromeDriverPro driver = new ChromeDriverPro(chromeOptions);
 		//设置压缩文件下标
 		driver.setIndex(i);
 		//设置5分钟超时时间
