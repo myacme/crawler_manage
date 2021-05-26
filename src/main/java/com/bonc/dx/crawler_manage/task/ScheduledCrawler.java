@@ -30,8 +30,8 @@ public class ScheduledCrawler {
 	@Scheduled(cron = "0 10 0 * * ?")
 	public void execute() {
 		System.out.println("====================定时启动=================");
-		proxyDriverPool.init(initSystemProperty);
-//		driverPool.init(initSystemProperty);
+//		proxyDriverPool.init(initSystemProperty);
+		driverPool.init(initSystemProperty);
 		ApplicationContext applicationContext = SpringUtil.getApplicationContext();
 		Map<String, Crawler> crawlers = applicationContext.getBeansOfType(Crawler.class);
 		for (Map.Entry entry : crawlers.entrySet()) {
