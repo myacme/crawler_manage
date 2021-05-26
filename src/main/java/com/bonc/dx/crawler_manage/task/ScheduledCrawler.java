@@ -1,5 +1,6 @@
 package com.bonc.dx.crawler_manage.task;
 
+import com.bonc.dx.crawler_manage.pool.driver.ChromeDriverPool;
 import com.bonc.dx.crawler_manage.pool.driver.InitSystemProperty;
 import com.bonc.dx.crawler_manage.pool.driver.ProxyChromeDriverPool;
 import com.bonc.dx.crawler_manage.task.crawler.Crawler;
@@ -16,7 +17,10 @@ import java.util.Map;
 @Component
 public class ScheduledCrawler {
 	@Autowired
-	ProxyChromeDriverPool driverPool;
+	ProxyChromeDriverPool proxyDriverPool;
+
+	@Autowired
+	ChromeDriverPool driverPool;
 
 	@Autowired
 	InitSystemProperty initSystemProperty;
@@ -26,7 +30,8 @@ public class ScheduledCrawler {
 	@Scheduled(cron = "0 10 0 * * ?")
 	public void execute() {
 		System.out.println("====================定时启动=================");
-		driverPool.init(initSystemProperty);
+		proxyDriverPool.init(initSystemProperty);
+//		driverPool.init(initSystemProperty);
 		ApplicationContext applicationContext = SpringUtil.getApplicationContext();
 		Map<String, Crawler> crawlers = applicationContext.getBeansOfType(Crawler.class);
 		for (Map.Entry entry : crawlers.entrySet()) {

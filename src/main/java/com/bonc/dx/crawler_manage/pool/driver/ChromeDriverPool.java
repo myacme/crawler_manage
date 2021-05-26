@@ -5,6 +5,8 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.DependsOn;
+import org.springframework.stereotype.Component;
 
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -13,8 +15,8 @@ import java.util.concurrent.TimeUnit;
  * 阻塞队列实现一个池
  * 存放driver
  */
-//@Component
-//@DependsOn("initSystemProperty")
+@Component
+@DependsOn("initSystemProperty")
 public class ChromeDriverPool {
 
     private  InitSystemProperty initSystemProperty;
@@ -33,6 +35,15 @@ public class ChromeDriverPool {
 //        }
 //        log.info("driver池 初始化完成， 数量 : {}",queue.size());
 //    }
+
+    public void init(InitSystemProperty initSystemProperty) {
+        initSystemProperty.init();
+        int size = Integer.parseInt(System.getProperty("driver_size"));
+        for (int i = 0; i < size; i++) {
+            add();
+        }
+        log.info("Driver池 定时初始化完成， 数量 : {}", queue.size());
+    }
 
     /**
      * 阻塞获取，获取不到时，等待

@@ -1,5 +1,8 @@
 package com.bonc.dx.crawler_manage.task;
 
+import com.bonc.dx.crawler_manage.pool.driver.ChromeDriverPool;
+import com.bonc.dx.crawler_manage.pool.driver.InitSystemProperty;
+import com.bonc.dx.crawler_manage.pool.driver.ProxyChromeDriverPool;
 import com.bonc.dx.crawler_manage.service.TaskConfService;
 import com.bonc.dx.crawler_manage.task.crawler.CommonUtil;
 import com.bonc.dx.crawler_manage.task.crawler.Crawler;
@@ -23,7 +26,13 @@ import java.util.Map;
 public class InitStartCrawler implements CommandLineRunner, ApplicationContextAware {
     @Autowired
     TaskConfService taskConfService;
+    @Autowired
+    ChromeDriverPool driverPool;
 
+    @Autowired
+    ProxyChromeDriverPool proxyDriverPool;
+    @Autowired
+    InitSystemProperty initSystemProperty;
     @Override
     public void run(String... args) throws Exception {
 //        List<Map<String,String>> list = taskConfService.getType1("1");
@@ -34,10 +43,12 @@ public class InitStartCrawler implements CommandLineRunner, ApplicationContextAw
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         Map<String, Crawler> crawlers = applicationContext.getBeansOfType(Crawler.class);
+//        driverPool.init(initSystemProperty);
+        proxyDriverPool.init(initSystemProperty);
         for(Map.Entry entry : crawlers.entrySet()){
             System.out.println(entry.getKey() + ":" + entry.getValue());
             //需要测试某一个就放开if条件 匹配类的bean
-                if(entry.getKey().equals("SHGGZYCrawller")){
+                if(entry.getKey().equals("WEAINMILCrawller")){
                 crawlers.get(entry.getKey()).run();
 
             }
