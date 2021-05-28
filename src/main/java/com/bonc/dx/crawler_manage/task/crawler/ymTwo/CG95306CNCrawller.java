@@ -16,6 +16,8 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -40,6 +42,8 @@ import static com.bonc.dx.crawler_manage.util.ffcode.Util.GetUrlImage;
 @Component
 public class CG95306CNCrawller implements Crawler {
 
+	@Autowired(required = false)
+	ChromeDriverPool driverPool;
 	@Autowired
 	CommonService commonService;
 
@@ -54,10 +58,9 @@ public class CG95306CNCrawller implements Crawler {
 	private  String begin_time;
 	private  String end_time;
 	public static  final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-	private static String reg = "https://cg.95306.cn/proxy/portal/elasticSearch/queryDataToEs?projBidType=01&pageNum=";
-	private static String reg2 = "https://cg.95306.cn/proxy/portal/elasticSearch/indexView?noticeId=";
-	private static String reg3 = "https://cg.95306.cn/proxy/portal/elasticSearch/indexView?noticeId=11a699bb7b54d11fff6b11da863b7f88&code=";
-	private static String reg4 = "https://cg.95306.cn/baseinfor/notice/informationShow?id=";
+	private static String reg = "https://cg.95306.cn/baseinfor/notice/procurementNotice?bidType=&noticeType=000&transactionType=01&wzType=&title=&bidding=&navigation=";
+
+	private static String reg2 = "https://cg.95306.cn/baseinfor/notice/informationShow?id=";
 
 	@Autowired
 	CommonUtil commonUtil;
@@ -73,101 +76,120 @@ public class CG95306CNCrawller implements Crawler {
 
 
 	public void runTest() {
-		HttpGet get = null;
+		WebDriver driver = null;
+		WebDriver driver2 = null;
 		try {
-			HttpClient httpClient = HttpClientBuilder.create().build();
 			Map<String,String> days = commonUtil.getDays(Thread.currentThread().getStackTrace()[1].getClassName());
 			String table_name = commonUtil.getTableName();
 
 			begin_time = days.get("start");
 			end_time = days.get("end");
+//			end_time = "2021-5-28";
+			driver = driverPool.get();
+			driver2 = driverPool.get();
 
-			isNext = true;
-			int pageNum = 31;
-			int repeat = 1;
-			while (isNext) {
-				System.out.println(reg+pageNum);
-				get = new HttpGet(reg+pageNum);
+			driver.manage().timeouts().implicitlyWait(1, TimeUnit.SECONDS);
+			driver2.manage().timeouts().implicitlyWait(1, TimeUnit.SECONDS);
 
-				//http
-				HttpResponse response = httpClient.execute(get);
-
-				JSONObject jsonObject = new JSONObject();
-				//访问成功
-				if(response.getStatusLine().getStatusCode() == 200){
-					HttpEntity entity = response.getEntity();
-
-					String resJson = EntityUtils.toString(entity);
-					jsonObject = JSONObject.parseObject(resJson);
-				}
-				if(jsonObject != null ){
-					if (jsonObject.getBoolean("success")) {
-						//页码调下一页
-                        pageNum++;
-                        //列表页记次数重置
-						repeat = 1;
-						JSONObject resultData = jsonObject.getJSONObject("data").getJSONObject("resultData");
-						isNext = !resultData.getBoolean("lastPage");
-						JSONArray lis = resultData.getJSONArray("result");
-						for (Object e : lis) {
-							String title =  ((JSONObject)e).getString("notTitle");
-							String date = ((JSONObject)e).getString("checkTime");
-							String type = ((JSONObject)e).getString("bidTypeName");
-							String id = ((JSONObject)e).getString("id");
-
-							if (date.equals("") || !date.contains("-") || simpleDateFormat.parse(end_time).before(simpleDateFormat.parse(date))) {
-								//结束时间在爬取到的时间之前 就下一个
-//                                isNext = true;
-								continue;
-							} else if (!date.equals("") && (begin_time == null || !simpleDateFormat.parse(date).before(simpleDateFormat.parse(begin_time)))) {
-								//begin_time为null代表爬取全量的  或者 开始时间 小于等于 爬取到的时间之前
-//                                isNext = true;
-//							DbUtil.insertdataZGZFCGW(insertMap);
-								//详情页面爬取content  单独开窗口
-                                int verification_num = verification(1, get, httpClient, id, title, type, date, TABLE_NAME,"");
-//                                int verification_num = verification(1, get, httpClient, id, title, type, date, table_name,"");
-                                if (verification_num > 5){
-                                    commonService.insertLogInfo(SOURCE,CG95306CNCrawller.class.getName(),"error","详情页验证码重试5次不成功");
-//                                    return;
-                                }
-                            } else {
-//								isNext = false;
-							}
-
-
-						}
-					}else {
-						//列表页有验证码了
-                        if (repeat > 5){
-                            commonService.insertLogInfo(SOURCE,CG95306CNCrawller.class.getName(),"error","列表页验证码重试5次不成功");
-                            return;
-                        }
-                        fateadmPage(get,httpClient);
-                        repeat++;
-					}
-				}
-
+			System.out.println(reg);
+			driver.get(reg);
+			Thread.sleep(2000);
+			//进入验证码验证
+			int num = fateadmPage(driver, 1);
+			if (num > 5){
+				commonService.insertLogInfo(SOURCE,CG95306CNCrawller.class.getName(),"error","列表页验证码重试5次不成功");
+				return;
 			}
 
+			isNext = true;
+			int repeat = 1;
+			while (isNext) {
+				Document list_doc = Jsoup.parse(driver.getPageSource());
+				Elements lis = list_doc.select("div.text_con > div.text_row");
+//				List<WebElement> lis = driver.findElements(By.cssSelector("div.text_con > div.text_row"));
+				for (Element li : lis) {
+					String title =  li.select("div.text_row_htit.clearfix > div.htit").text();
+					String date = li.select("div.text_row_htit.clearfix > div.declare_time >span:nth-child(2)").text();
+					String type = li.select("div.text_row_tab > ul > li.first").text().trim();
+					String id = li.select("div.text_row_htit.clearfix > div.htit > a").attr("onclick");
+					id = id.replace("noticeDetailNotice('","").replace("')","");
+					String url = reg2+id;
+
+
+
+					if (date.equals("") || !date.contains("-") || simpleDateFormat.parse(end_time).before(simpleDateFormat.parse(date))) {
+						//结束时间在爬取到的时间之前 就下一个
+							isNext = true;
+						continue;
+					} else if (!date.equals("") && (begin_time == null || !simpleDateFormat.parse(date).before(simpleDateFormat.parse(begin_time)))) {
+						//begin_time为null代表爬取全量的  或者 开始时间 小于等于 爬取到的时间之前
+						isNext = true;
+
+						driver2.get(url);
+						Thread.sleep(2000);
+
+						//进入验证码验证
+						int num3 = fateadmPage(driver2, 1);
+						if (num3 > 10){
+							commonService.insertLogInfo(SOURCE,CG95306CNCrawller.class.getName(),"error","详情页验证码重试10次不成功");
+							return;
+						}
+						Document doc = Jsoup.parse(driver2.getPageSource());
+						String content = doc.select("#main >div.main_content > div.article_detail").text();
+
+						//加入实体类 入库
+						CrawlerEntity insertMap = new CrawlerEntity();
+						insertMap.setUrl(url);
+						insertMap.setTitle(title);
+						insertMap.setCity(CITY);
+						insertMap.setType(type);
+						insertMap.setDate(date);
+						insertMap.setContent(content);
+						insertMap.setSource(SOURCE);
+						insertMap.setIsCrawl("1");
+//						System.out.println("=====================" + insertMap.toString());
+//						commonService.insertTable(insertMap, TABLE_NAME);
+						commonService.insertTable(insertMap, table_name);
+					} else {
+							isNext = false;
+					}
+
+
+				}
+
+				if (isNext) {
+					log.info(driver.getCurrentUrl());
+					WebElement next = driver.findElement(By.cssSelector("div.next_page"));
+					next.click();
+					Thread.sleep(2000);
+					//进入验证码验证
+					int num2 = fateadmPage(driver, 1);
+					if (num2 > 10){
+						commonService.insertLogInfo(SOURCE,CG95306CNCrawller.class.getName(),"error","列表页验证码重试10次不成功");
+						return;
+					}
+				} else {
+					break;
+				}
+			}
             commonService.insertLogInfo(SOURCE,CG95306CNCrawller.class.getName(),"success","");
 		} catch (Exception e) {
 			e.printStackTrace();
 			commonService.insertLogInfo(SOURCE,CG95306CNCrawller.class.getName(),"error",e.getMessage());
 		} finally {
-			try {
-				if (get!=null) {
-					get.releaseConnection();
-				}
-			}catch (Exception e){
-				e.printStackTrace();
+			if(driver != null){
+				driverPool.release(driver);
+			}
+			if(driver2 != null){
+				driverPool.release(driver2);
 			}
 		}
 		System.out.println("exit");
 	}
 
-	public String fateadm() {
+	public String fateadm(String imageUrl) {
 		try {
-			String imageUrl = "https://cg.95306.cn//proxy/portal/enterprise/base/loadComplexValidCodeImg?validCodeKey=1622013362744";
+//			String imageUrl = "https://cg.95306.cn"+src;
 			Api api = new Api();
 			api.Init2();
 			String pred_type = "30500";
@@ -183,71 +205,36 @@ public class CG95306CNCrawller implements Crawler {
 		return "";
 	}
 
-    public void fateadmPage(HttpGet get,HttpClient httpClient)throws Exception{
-        String fateadm = fateadm();
-        get = new HttpGet(reg3+fateadm);
-		HttpResponse response2 = httpClient.execute(get);
-		JSONObject jsonObject2 = new JSONObject();
-		//访问成功
-		if(response2.getStatusLine().getStatusCode() == 200){
-			HttpEntity entity = response2.getEntity();
-
-			String resJson = EntityUtils.toString(entity);
-			jsonObject2 = JSONObject.parseObject(resJson);
+    public int fateadmPage(WebDriver driver,int num){
+		if (num > 10){
+			return num;
 		}
-    }
+		try {
+			//没找到时进入catch表示没有验证码
+			//点击刷新验证码，防止识别错误后图片不变
+			driver.findElement(By.cssSelector("#validCodeImg")).click();
+			Thread.sleep(500);
+			String src = driver.findElement(By.cssSelector("#validCodeImg")).getAttribute("src");
+			String codeString = fateadm(src);
+			driver.findElement(By.cssSelector("#validateCode")).clear();
+			driver.findElement(By.cssSelector("#validateCode")).sendKeys(codeString);
+			Thread.sleep(500);
+			driver.findElement(By.cssSelector("div.layui-layer-btn.layui-layer-btn- > a")).click();
+			Thread.sleep(500);
+			num++;
+			try {
+				//验证错误时候  通过找到下面的标签判断是否验证失败
+				driver.findElement(By.cssSelector("div.layui-layer.layui-layer-dialog.layui-layer-border.layui-layer-msg"));
+				Thread.sleep(5000);
+				num = fateadmPage(driver,num);
+			}catch (Exception e){
 
-	public int verification(int num,HttpGet get,HttpClient httpClient,String id,String title,String type,String date,String table_name,String fateadm) throws Exception{
-		String urlDetail = reg2+id;
-		System.out.println(urlDetail);
-		if (fateadm.equals("")) {
-            //第一次进来  没有验证码
-            get = new HttpGet(urlDetail);
-        }else {
-            get = new HttpGet(urlDetail+"&code="+fateadm);
-        }
-        Thread.sleep(2000);
+			}
+		}catch (Exception e){
+			return num;
+		}
+		return num;
+	}
 
-        //http
-		HttpResponse response2 = httpClient.execute(get);
-
-        JSONObject jsonObject2 = new JSONObject();
-        //访问成功
-        if(response2.getStatusLine().getStatusCode() == 200){
-            HttpEntity entity = response2.getEntity();
-
-            String resJson = EntityUtils.toString(entity);
-            jsonObject2 = JSONObject.parseObject(resJson);
-        }
-        if(jsonObject2 != null ){
-            if (jsonObject2.getBoolean("success")) {
-                String string = jsonObject2.getJSONObject("data").getJSONObject("noticeContent").getString("notCont");
-                Document doc = Jsoup.parse(string);
-                String content = doc.text();
-                //加入实体类 入库
-                CrawlerEntity insertMap = new CrawlerEntity();
-                insertMap.setUrl(reg4+id);
-                insertMap.setTitle(title);
-                insertMap.setCity(CITY);
-                insertMap.setType(type);
-                insertMap.setDate(date);
-                insertMap.setContent(content);
-                insertMap.setSource(SOURCE);
-                insertMap.setIsCrawl("1");
-                commonService.insertTable(insertMap, table_name);
-            }else {
-                //详情页有验证码了
-                fateadm = fateadm();
-                if (num > 5){
-					System.out.println("重试超过5次");
-                    return num;
-                }else {
-                    num++;
-					num = verification(num, get, httpClient, id, title, type, date, table_name,fateadm);
-                }
-            }
-        }
-	    return num;
-    }
 }
 
