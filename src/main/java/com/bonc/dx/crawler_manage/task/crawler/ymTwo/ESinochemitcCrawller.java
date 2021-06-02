@@ -31,7 +31,7 @@ import static com.bonc.dx.crawler_manage.util.ffcode.Util.GetUrlImage;
  * @date 2021-5-26 09:43:28
  */
 @Component
-public class MOFGovCrawller implements Crawler {
+public class ESinochemitcCrawller implements Crawler {
 
 	@Autowired(required = false)
 	ChromeDriverPool driverPool;
@@ -39,20 +39,20 @@ public class MOFGovCrawller implements Crawler {
 	CommonService commonService;
 
 
-	private static Logger log = LoggerFactory.getLogger(MOFGovCrawller.class);
+	private static Logger log = LoggerFactory.getLogger(ESinochemitcCrawller.class);
 	private  long ct = 0;
 	private  boolean isNext = true;
 	//测试用表
 	private static final String TABLE_NAME = "data_ccgp_henan_info";
-	private static final String SOURCE = "中华人民共和国财政部";
+	private static final String SOURCE = "中化商务电子招投标平台";
 	private static final String CITY = "直管政务网站";
 	private  String begin_time;
 	private  String end_time;
 	public static  final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-	private static String reg = "http://www.mof.gov.cn/xinxi/zhongyangbiaoxun/zhaobiaogonggao/";
-	private static String reg2 = "http://www.mof.gov.cn/xinxi/zhongyangbiaoxun/zhongbiaogonggao/";
-	private static String reg3 = "http://www.mof.gov.cn/xinxi/zhongyangbiaoxun/gengzhenggonggao/";
-
+	private static String reg = "http://e.sinochemitc.com/cms/channel/ywgg1qb/index.htm";
+	private static String reg2 = "http://e.sinochemitc.com/cms/channel/ywgg2qb/index.htm";
+	private static String reg3 = "http://e.sinochemitc.com/cms/channel/ywgg3qb/index.htm";
+	private static String fix = "http://e.sinochemitc.com";
 
 	@Autowired
 	CommonUtil commonUtil;
@@ -71,7 +71,7 @@ public class MOFGovCrawller implements Crawler {
 		WebDriver driver = null;
 		WebDriver driver2 = null;
 		try {
-			commonService.insertLogInfo(SOURCE,MOFGovCrawller.class.getName(),"begin","");
+			commonService.insertLogInfo(SOURCE,ESinochemitcCrawller.class.getName(),"begin","");
 			Map<String,String> days = commonUtil.getDays(Thread.currentThread().getStackTrace()[1].getClassName());
 			String table_name = commonUtil.getTableName();
 
@@ -88,13 +88,13 @@ public class MOFGovCrawller implements Crawler {
 			for (int i = 0; i < 3; i++) {
 				if (i==0){
 					initUrl = reg;
-					type = "招标公告";
+					type = "招标/预审/变更";
 				}else if (i==1){
 					initUrl = reg2;
-					type = "中标公告";
+					type = "评标结果/中标结果";
 				}else if (i==2){
 					initUrl = reg3;
-					type = "更正公告";
+					type = "非招标采购公告";
 				}
 
 				System.out.println(initUrl);
@@ -103,13 +103,14 @@ public class MOFGovCrawller implements Crawler {
 				isNext = true;
 				while (isNext) {
 					Document list_doc = Jsoup.parse(driver.getPageSource());
-					Elements lis = list_doc.select("ul.xwbd_lianbolistfrcon > li");
+					Elements lis = list_doc.select("ul.search-list > li");
 //				List<WebElement> lis = driver.findElements(By.cssSelector("div.text_con > div.text_row"));
 					for (Element li : lis) {
 						String title = li.select("a").attr("title");
-						String date = li.select("span").text();
+						String date = li.select("p.time").text().replace("发布时间： ","");
 						String url = li.select("a").attr("href");
-						url = initUrl+url.replace("./","");
+						url = fix+url.replace("./","");
+						String content = li.select("div.p >#xs").text();
 
 						if (date.equals("") || !date.contains("-") || simpleDateFormat.parse(end_time).before(simpleDateFormat.parse(date))) {
 							//结束时间在爬取到的时间之前 就下一个
@@ -118,15 +119,7 @@ public class MOFGovCrawller implements Crawler {
 						} else if (!date.equals("") && (begin_time == null || !simpleDateFormat.parse(date).before(simpleDateFormat.parse(begin_time)))) {
 							//begin_time为null代表爬取全量的  或者 开始时间 小于等于 爬取到的时间之前
 							isNext = true;
-							System.out.println(url);
-							driver2.get(url);
-							Thread.sleep(1000);
 
-							Document doc = Jsoup.parse(driver2.getPageSource());
-							String content = doc.select("div.my_conboxzw").text();
-							if (content.equals("")){
-								content = doc.text();
-							}
 							//加入实体类 入库
 							CrawlerEntity insertMap = new CrawlerEntity();
 							insertMap.setUrl(url);
@@ -149,7 +142,7 @@ public class MOFGovCrawller implements Crawler {
 
 					if (isNext) {
 						log.info(driver.getCurrentUrl());
-						WebElement next = driver.findElement(By.cssSelector(".xwbd_lianbolistfr > p.pagerji:nth-child(3) >span:nth-last-child(2) > a"));
+						WebElement next = driver.findElement(By.cssSelector("a[aria-label=\"Next\"]"));
 						next.click();
 						Thread.sleep(1000);
 
@@ -158,10 +151,10 @@ public class MOFGovCrawller implements Crawler {
 					}
 				}
 			}
-            commonService.insertLogInfo(SOURCE,MOFGovCrawller.class.getName(),"success","");
+            commonService.insertLogInfo(SOURCE,ESinochemitcCrawller.class.getName(),"success","");
 		} catch (Exception e) {
 			e.printStackTrace();
-			commonService.insertLogInfo(SOURCE,MOFGovCrawller.class.getName(),"error",e.getMessage());
+			commonService.insertLogInfo(SOURCE,ESinochemitcCrawller.class.getName(),"error",e.getMessage());
 		} finally {
 			if(driver != null){
 				driverPool.release(driver);
