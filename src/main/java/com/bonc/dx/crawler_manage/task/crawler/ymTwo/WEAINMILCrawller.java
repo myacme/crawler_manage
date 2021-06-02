@@ -66,6 +66,7 @@ public class WEAINMILCrawller implements Crawler {
 		WebDriver driver = null;
 		WebDriver driver2 = null;
 		try {
+			commonService.insertLogInfo(SOURCE,WEAINMILCrawller.class.getName(),"begin","");
 			Map<String,String> days = commonUtil.getDays(Thread.currentThread().getStackTrace()[1].getClassName());
 			driver = driverPool.get();
 //		chromeOptions2.addArguments("--headless --no-sandbox\n".split(" "));

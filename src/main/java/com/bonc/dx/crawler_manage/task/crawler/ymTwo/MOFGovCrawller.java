@@ -1,19 +1,11 @@
 package com.bonc.dx.crawler_manage.task.crawler.ymTwo;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.bonc.dx.crawler_manage.entity.CrawlerEntity;
 import com.bonc.dx.crawler_manage.pool.driver.ChromeDriverPool;
 import com.bonc.dx.crawler_manage.service.CommonService;
 import com.bonc.dx.crawler_manage.task.crawler.CommonUtil;
 import com.bonc.dx.crawler_manage.task.crawler.Crawler;
 import com.bonc.dx.crawler_manage.util.ffcode.Api;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -29,7 +21,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.FileNotFoundException;
 import java.text.SimpleDateFormat;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -40,7 +31,7 @@ import static com.bonc.dx.crawler_manage.util.ffcode.Util.GetUrlImage;
  * @date 2021-5-26 09:43:28
  */
 @Component
-public class CG95306CNCrawller implements Crawler {
+public class MOFGovCrawller implements Crawler {
 
 	@Autowired(required = false)
 	ChromeDriverPool driverPool;
@@ -48,19 +39,20 @@ public class CG95306CNCrawller implements Crawler {
 	CommonService commonService;
 
 
-	private static Logger log = LoggerFactory.getLogger(CG95306CNCrawller.class);
+	private static Logger log = LoggerFactory.getLogger(MOFGovCrawller.class);
 	private  long ct = 0;
 	private  boolean isNext = true;
 	//测试用表
 	private static final String TABLE_NAME = "data_ccgp_henan_info";
-	private static final String SOURCE = "中国铁路总公司";
+	private static final String SOURCE = "中华人民共和国财政部";
 	private static final String CITY = "直管政务网站";
 	private  String begin_time;
 	private  String end_time;
 	public static  final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-	private static String reg = "https://cg.95306.cn/baseinfor/notice/procurementNotice?bidType=&noticeType=000&transactionType=01&wzType=&title=&bidding=&navigation=";
+	private static String reg = "http://www.mof.gov.cn/xinxi/zhongyangbiaoxun/zhaobiaogonggao/";
+	private static String reg2 = "http://www.mof.gov.cn/xinxi/zhongyangbiaoxun/zhongbiaogonggao/";
+	private static String reg3 = "http://www.mof.gov.cn/xinxi/zhongyangbiaoxun/gengzhenggonggao/";
 
-	private static String reg2 = "https://cg.95306.cn/baseinfor/notice/informationShow?id=";
 
 	@Autowired
 	CommonUtil commonUtil;
@@ -79,7 +71,7 @@ public class CG95306CNCrawller implements Crawler {
 		WebDriver driver = null;
 		WebDriver driver2 = null;
 		try {
-			commonService.insertLogInfo(SOURCE,CG95306CNCrawller.class.getName(),"begin","");
+			commonService.insertLogInfo(SOURCE,MOFGovCrawller.class.getName(),"begin","");
 			Map<String,String> days = commonUtil.getDays(Thread.currentThread().getStackTrace()[1].getClassName());
 			String table_name = commonUtil.getTableName();
 
@@ -91,92 +83,85 @@ public class CG95306CNCrawller implements Crawler {
 
 			driver.manage().timeouts().implicitlyWait(1, TimeUnit.SECONDS);
 			driver2.manage().timeouts().implicitlyWait(1, TimeUnit.SECONDS);
+			String initUrl = "";
+			String type = "";
+			for (int i = 0; i < 3; i++) {
+				if (i==0){
+					initUrl = reg;
+					type = "招标公告";
+				}else if (i==1){
+					initUrl = reg2;
+					type = "中标公告";
+				}else if (i==2){
+					initUrl = reg3;
+					type = "更正公告";
+				}
 
-			System.out.println(reg);
-			driver.get(reg);
-			Thread.sleep(2000);
-			//进入验证码验证
-			int num = fateadmPage(driver, 1);
-			if (num > 5){
-				commonService.insertLogInfo(SOURCE,CG95306CNCrawller.class.getName(),"error","列表页验证码重试5次不成功");
-				return;
-			}
-
-			isNext = true;
-			int repeat = 1;
-			while (isNext) {
-				Document list_doc = Jsoup.parse(driver.getPageSource());
-				Elements lis = list_doc.select("div.text_con > div.text_row");
+				System.out.println(initUrl);
+				driver.get(initUrl);
+				Thread.sleep(1000);
+				isNext = true;
+				while (isNext) {
+					Document list_doc = Jsoup.parse(driver.getPageSource());
+					Elements lis = list_doc.select("ul.xwbd_lianbolistfrcon > li");
 //				List<WebElement> lis = driver.findElements(By.cssSelector("div.text_con > div.text_row"));
-				for (Element li : lis) {
-					String title =  li.select("div.text_row_htit.clearfix > div.htit").text();
-					String date = li.select("div.text_row_htit.clearfix > div.declare_time >span:nth-child(2)").text();
-					String type = li.select("div.text_row_tab > ul > li.first").text().trim();
-					String id = li.select("div.text_row_htit.clearfix > div.htit > a").attr("onclick");
-					id = id.replace("noticeDetailNotice('","").replace("')","");
-					String url = reg2+id;
+					for (Element li : lis) {
+						String title = li.select("a").attr("title");
+						String date = li.select("span").text();
+						String url = li.select("a").attr("href");
+						url = initUrl+url.replace("./","");
 
-
-
-					if (date.equals("") || !date.contains("-") || simpleDateFormat.parse(end_time).before(simpleDateFormat.parse(date))) {
-						//结束时间在爬取到的时间之前 就下一个
+						if (date.equals("") || !date.contains("-") || simpleDateFormat.parse(end_time).before(simpleDateFormat.parse(date))) {
+							//结束时间在爬取到的时间之前 就下一个
 							isNext = true;
-						continue;
-					} else if (!date.equals("") && (begin_time == null || !simpleDateFormat.parse(date).before(simpleDateFormat.parse(begin_time)))) {
-						//begin_time为null代表爬取全量的  或者 开始时间 小于等于 爬取到的时间之前
-						isNext = true;
+							continue;
+						} else if (!date.equals("") && (begin_time == null || !simpleDateFormat.parse(date).before(simpleDateFormat.parse(begin_time)))) {
+							//begin_time为null代表爬取全量的  或者 开始时间 小于等于 爬取到的时间之前
+							isNext = true;
+							System.out.println(url);
+							driver2.get(url);
+							Thread.sleep(1000);
 
-						driver2.get(url);
-						Thread.sleep(2000);
-
-						//进入验证码验证
-						int num3 = fateadmPage(driver2, 1);
-						if (num3 > 10){
-							commonService.insertLogInfo(SOURCE,CG95306CNCrawller.class.getName(),"error","详情页验证码重试10次不成功");
-							return;
-						}
-						Document doc = Jsoup.parse(driver2.getPageSource());
-						String content = doc.select("#main >div.main_content > div.article_detail").text();
-
-						//加入实体类 入库
-						CrawlerEntity insertMap = new CrawlerEntity();
-						insertMap.setUrl(url);
-						insertMap.setTitle(title);
-						insertMap.setCity(CITY);
-						insertMap.setType(type);
-						insertMap.setDate(date);
-						insertMap.setContent(content);
-						insertMap.setSource(SOURCE);
-						insertMap.setIsCrawl("1");
-//						System.out.println("=====================" + insertMap.toString());
-//						commonService.insertTable(insertMap, TABLE_NAME);
-						commonService.insertTable(insertMap, table_name);
-					} else {
+							Document doc = Jsoup.parse(driver2.getPageSource());
+							String content = doc.select("div.my_conboxzw").text();
+							if (content.equals("")){
+								content = doc.text();
+							}
+							//加入实体类 入库
+							CrawlerEntity insertMap = new CrawlerEntity();
+							insertMap.setUrl(url);
+							insertMap.setTitle(title);
+							insertMap.setCity(CITY);
+							insertMap.setType(type);
+							insertMap.setDate(date);
+							insertMap.setContent(content);
+							insertMap.setSource(SOURCE);
+							insertMap.setIsCrawl("1");
+//							System.out.println("=====================" + insertMap.toString());
+							commonService.insertTable(insertMap, TABLE_NAME);
+//							commonService.insertTable(insertMap, table_name);
+						} else {
 							isNext = false;
+						}
+
+
 					}
 
+					if (isNext) {
+						log.info(driver.getCurrentUrl());
+						WebElement next = driver.findElement(By.cssSelector(".xwbd_lianbolistfr > p.pagerji:nth-child(3) >span:nth-last-child(2) > a"));
+						next.click();
+						Thread.sleep(1000);
 
-				}
-
-				if (isNext) {
-					log.info(driver.getCurrentUrl());
-					WebElement next = driver.findElement(By.cssSelector("div.next_page"));
-					next.click();
-					Thread.sleep(2000);
-					//进入验证码验证
-					int num2 = fateadmPage(driver, 1);
-					if (num2 > 10){
-						commonService.insertLogInfo(SOURCE,CG95306CNCrawller.class.getName(),"error","列表页验证码重试10次不成功");
-						return;
+					} else {
+						break;
 					}
-				} else {
-					break;
 				}
 			}
-            commonService.insertLogInfo(SOURCE,CG95306CNCrawller.class.getName(),"success","");
+            commonService.insertLogInfo(SOURCE,MOFGovCrawller.class.getName(),"success","");
 		} catch (Exception e) {
 			e.printStackTrace();
-			commonService.insertLogInfo(SOURCE,CG95306CNCrawller.class.getName(),"error",e.getMessage());
+			commonService.insertLogInfo(SOURCE,MOFGovCrawller.class.getName(),"error",e.getMessage());
 		} finally {
 			if(driver != null){
 				driverPool.release(driver);
