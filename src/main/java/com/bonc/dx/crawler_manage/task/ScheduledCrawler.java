@@ -27,7 +27,7 @@ public class ScheduledCrawler {
 
 	private Logger logger = LoggerFactory.getLogger(getClass());
 
-	@Scheduled(cron = "0 10 0 * * ?")
+	@Scheduled(cron = "0 20 0 * * ?")
 	public void execute() {
 		System.out.println("====================定时启动=================");
 //		proxyDriverPool.init(initSystemProperty);

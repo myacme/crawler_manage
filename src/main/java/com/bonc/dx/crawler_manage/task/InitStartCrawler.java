@@ -42,7 +42,7 @@ public class InitStartCrawler implements CommandLineRunner, ApplicationContextAw
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        Map<String, Crawler> crawlers = applicationContext.getBeansOfType(Crawler.class);
+        /*Map<String, Crawler> crawlers = applicationContext.getBeansOfType(Crawler.class);
         driverPool.init(initSystemProperty);
 //        proxyDriverPool.init(initSystemProperty);
         for(Map.Entry entry : crawlers.entrySet()){
@@ -52,6 +52,6 @@ public class InitStartCrawler implements CommandLineRunner, ApplicationContextAw
                 crawlers.get(entry.getKey()).run();
 
             }
-        }
+        }*/
     }
 }
