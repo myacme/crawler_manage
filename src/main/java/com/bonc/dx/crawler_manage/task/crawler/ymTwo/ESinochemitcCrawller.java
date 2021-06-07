@@ -166,54 +166,5 @@ public class ESinochemitcCrawller implements Crawler {
 		System.out.println("exit");
 	}
 
-	public String fateadm(String imageUrl) {
-		try {
-//			String imageUrl = "https://cg.95306.cn"+src;
-			Api api = new Api();
-			api.Init2();
-			String pred_type = "30500";
-			String codeString = api.PredictExtend(pred_type, GetUrlImage(imageUrl)).toUpperCase();
-			System.out.println("codeString="+codeString);
-			return codeString;
-		} catch (FileNotFoundException fe) {
-			fe.printStackTrace();
-			return "fileNotFound";
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return "";
-	}
-
-    public int fateadmPage(WebDriver driver,int num){
-		if (num > 10){
-			return num;
-		}
-		try {
-			//没找到时进入catch表示没有验证码
-			//点击刷新验证码，防止识别错误后图片不变
-			driver.findElement(By.cssSelector("#validCodeImg")).click();
-			Thread.sleep(500);
-			String src = driver.findElement(By.cssSelector("#validCodeImg")).getAttribute("src");
-			String codeString = fateadm(src);
-			driver.findElement(By.cssSelector("#validateCode")).clear();
-			driver.findElement(By.cssSelector("#validateCode")).sendKeys(codeString);
-			Thread.sleep(500);
-			driver.findElement(By.cssSelector("div.layui-layer-btn.layui-layer-btn- > a")).click();
-			Thread.sleep(500);
-			num++;
-			try {
-				//验证错误时候  通过找到下面的标签判断是否验证失败
-				driver.findElement(By.cssSelector("div.layui-layer.layui-layer-dialog.layui-layer-border.layui-layer-msg"));
-				Thread.sleep(5000);
-				num = fateadmPage(driver,num);
-			}catch (Exception e){
-
-			}
-		}catch (Exception e){
-			return num;
-		}
-		return num;
-	}
-
 }
 
