@@ -53,7 +53,7 @@ import java.util.Map;
  * @create 2021/6/7
  * @since 1.0.0
  */
-@Component
+//@Component
 public class QjWqzbCgxxwProcessor implements PageProcessor, Crawler {
 
 	@Autowired
