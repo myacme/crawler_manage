@@ -23,12 +23,10 @@ import com.bonc.dx.crawler_manage.entity.CrawlerEntity;
 import com.bonc.dx.crawler_manage.service.CommonService;
 import com.bonc.dx.crawler_manage.task.crawler.CommonUtil;
 import com.bonc.dx.crawler_manage.task.crawler.Crawler;
-import com.bonc.dx.crawler_manage.webMagic.downloader.SeleniumDownloadUseDriverPool;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.openqa.selenium.WebDriver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -46,27 +44,24 @@ import java.util.Date;
 import java.util.Map;
 
 /**
- * 〈特种装备招标网〉<br>
+ * 〈房山区政府采购网〉<br>
  * 〈〉
  *
  * @author MyAcme
- * @create 2021/6/7
+ * @create 2021/6/10
  * @since 1.0.0
  */
 @Component
-public class TzsbZbwProcessor implements PageProcessor, Crawler {
+public class FsqZfcgwProcessor implements PageProcessor, Crawler {
 
 	@Autowired
 	private CommonService commonService;
 	@Autowired
 	private CommonUtil commonUtil;
-	@Autowired
-	SeleniumDownloadUseDriverPool seleniumDownloadUseDriverPool;
 
-	private static final String CITY = "军民融合";
-	private static final String SOURCE = "特种装备招标网";
+	private static final String CITY = "北京市";
+	private static final String SOURCE = "房山区政府采购网";
 	private static String table = "data_info_test";
-	private static WebDriver driver;
 	//开始日期
 	private static Date startTime;
 	//截止日期
@@ -78,38 +73,39 @@ public class TzsbZbwProcessor implements PageProcessor, Crawler {
 	//页码
 	private int pageNum = 2;
 	public final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-	public String initUrl = "https://zb.tezhongzhuangbei.com/qbxx.html?zczl=%%E5%%85%%A8%%E9%%83%%A8%%E7%%A7%%8D%%E7%%B1%%BB,&zcdq=%%E5%%85%%A8%%E9%%83%%A8%%E5%%9C%%B0%%E5%%8C%%BA,&page=%d";
+	public String initUrl = "http://www.bjfsh.gov.cn/zwgk/zfcg/index%s.shtml";
 
 	@Override
 	public void process(Page page) {
 		Document doc = Jsoup.parse(page.getRawText());
-		Elements select = doc.select("div.divk > div.div1190 > div.main_left > div.lm_lie > div.list_block");
+		Elements select = doc.select("body > div.wrap.oHid > div > div.whiteBox > ul > li");
 		if (select != null && select.size() != 0) {
 			for (Element element : select) {
-				String url = element.select("div.title_lb > a").attr("href");
-				String title = element.select("div.title_lb > a").attr("title");
-				String date = element.select("div.title_lb > span").text();
+				String url = element.select("a").attr("href");
+				String title = element.select("a").text();
+				String date = element.select("span").text().replaceAll("[\\[\\]]", "");
 				try {
 					if (startTime == null || (!"".equals(date) && !simpleDateFormat.parse(date).after(endTime) && !simpleDateFormat.parse(date).before(startTime))) {
-						Request request = new Request(new URL(new URL("https://zb.tezhongzhuangbei.com/"), url).toString());
+						Request request = new Request(new URL(new URL(initUrl), url).toString());
 						request.putExtra("date", date);
 						request.putExtra("title", title);
 						page.addTargetRequest(request);
 					} else if (startTime != null && !"".equals(date) && simpleDateFormat.parse(date).before(startTime)) {
 						isNext = false;
 					}
-				} catch (ParseException | MalformedURLException e) {
+				} catch (MalformedURLException | ParseException e) {
 					e.printStackTrace();
 				}
 			}
 			if (isNext) {
-				Request request = new Request(String.format(initUrl, pageNum));
+				Request request = new Request(String.format(initUrl, "_"+pageNum));
 				page.addTargetRequest(request);
 				pageNum++;
 			}
 		} else {
-			String content = doc.select("#content").text();
-			type = doc.select("div.title_nav > a").text();
+			type = doc.select("body > div.common_content > div.crumbsBox > div").text();
+			type = type.substring(type.lastIndexOf(">")+1).trim();
+			String content = doc.select("body > div.common_content > div.containerBox > div").text();
 			String title = page.getRequest().getExtra("title").toString();
 			String date = page.getRequest().getExtra("date").toString();
 			String url = page.getRequest().getUrl();
@@ -134,7 +130,7 @@ public class TzsbZbwProcessor implements PageProcessor, Crawler {
 				.setCycleRetryTimes(5)    // 添加到任务重试
 				.setUserAgent("Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36")
 				.setSleepTime(1000)
-				.setCharset("utf8").setTimeOut(30000);
+				.setCharset("UTF-8").setTimeOut(30000);
 		return site;
 	}
 
@@ -142,22 +138,21 @@ public class TzsbZbwProcessor implements PageProcessor, Crawler {
 	@Override
 	public void run() {
 		try {
-			commonService.insertLogInfo(SOURCE, TzsbZbwProcessor.class.getName(), "begin", "");
+			commonService.insertLogInfo(SOURCE, FsqZfcgwProcessor.class.getName(), "begin", "");
 			Map<String, String> days = commonUtil.getDays(Thread.currentThread().getStackTrace()[1].getClassName());
 			endTime = simpleDateFormat.parse(days.get("end"));
 			startTime = simpleDateFormat.parse(days.get("start"));
 			table = commonUtil.getTableName();
-			TzsbZbwProcessor bean = new TzsbZbwProcessor();
+			FsqZfcgwProcessor bean = new FsqZfcgwProcessor();
 			bean.commonService = commonService;
 			Spider spider = new Spider(bean);
-			spider.addUrl(String.format(bean.initUrl, 1));
-			spider.thread(1);
-			spider.setDownloader(seleniumDownloadUseDriverPool.setSleepTime(1000));
+			spider.addUrl(String.format(initUrl,""));
+			spider.thread(2);
 			spider.run();
-			commonService.insertLogInfo(SOURCE, TzsbZbwProcessor.class.getName(), "success", "");
+			commonService.insertLogInfo(SOURCE, FsqZfcgwProcessor.class.getName(), "success", "");
 		} catch (Exception e) {
 			e.printStackTrace();
-			commonService.insertLogInfo(SOURCE, TzsbZbwProcessor.class.getName(), "error", e.getMessage());
+			commonService.insertLogInfo(SOURCE, FsqZfcgwProcessor.class.getName(), "error", e.getMessage());
 		}
 	}
 }

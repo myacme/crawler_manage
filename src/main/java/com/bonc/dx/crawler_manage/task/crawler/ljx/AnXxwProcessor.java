@@ -20,16 +20,13 @@
 package com.bonc.dx.crawler_manage.task.crawler.ljx;
 
 import com.bonc.dx.crawler_manage.entity.CrawlerEntity;
-import com.bonc.dx.crawler_manage.pool.driver.ChromeDriverPool;
 import com.bonc.dx.crawler_manage.service.CommonService;
 import com.bonc.dx.crawler_manage.task.crawler.CommonUtil;
 import com.bonc.dx.crawler_manage.task.crawler.Crawler;
-import com.bonc.dx.crawler_manage.webMagic.downloader.SeleniumDownloadUseDriverPool;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.openqa.selenium.WebDriver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;

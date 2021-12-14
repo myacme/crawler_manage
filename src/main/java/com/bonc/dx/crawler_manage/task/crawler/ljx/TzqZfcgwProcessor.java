@@ -19,11 +19,17 @@
 
 package com.bonc.dx.crawler_manage.task.crawler.ljx;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.bonc.dx.crawler_manage.entity.CrawlerEntity;
+import com.bonc.dx.crawler_manage.pool.driver.ChromeDriverPool;
+import com.bonc.dx.crawler_manage.pool.driver.DriverPool;
 import com.bonc.dx.crawler_manage.service.CommonService;
 import com.bonc.dx.crawler_manage.task.crawler.CommonUtil;
 import com.bonc.dx.crawler_manage.task.crawler.Crawler;
 import com.bonc.dx.crawler_manage.webMagic.downloader.HttpClientDownloader;
+import com.bonc.dx.crawler_manage.webMagic.downloader.SeleniumDownloadUseDriverPool;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -38,6 +44,7 @@ import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.Spider;
 import us.codecraft.webmagic.model.HttpRequestBody;
 import us.codecraft.webmagic.processor.PageProcessor;
+import us.codecraft.webmagic.selector.Json;
 import us.codecraft.webmagic.utils.HttpConstant;
 
 import java.text.ParseException;
@@ -47,26 +54,29 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 〈机电产品招标投标电子交易平台〉<br>
+ * 〈通州区政府采购网〉<br>
  * 〈〉
  *
  * @author MyAcme
- * @create 2021/6/9
+ * @create 2021/6/16
  * @since 1.0.0
  */
 @Component
-public class JdCpZbtDzjyptProcessor implements PageProcessor, Crawler {
+public class TzqZfcgwProcessor implements PageProcessor, Crawler {
 
 	@Autowired
 	private CommonService commonService;
 	@Autowired
 	private CommonUtil commonUtil;
+	@Autowired
+	private ChromeDriverPool chromeDriverPool;
 
-	private static final String CITY = "其他外网资源";
-	private static final String SOURCE = "机电产品招标投标电子交易平台";
+	private static final String CITY = "北京市";
+	private static final String SOURCE = "通州区政府采购网";
 	private static String table = "data_info_test";
 	private static WebDriver driver;
 	private Param param;
+	HashMap<String, Object> map;
 	//开始日期
 	private static Date startTime;
 	//截止日期
@@ -78,24 +88,48 @@ public class JdCpZbtDzjyptProcessor implements PageProcessor, Crawler {
 	//页码
 	private int pageNum = 2;
 	public final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-	public String initUrl = "https://www.chinabidding.com/search/proj.htm";
+	public String initUrl = "http://zfcg.zwyun.bjtzh.gov.cn/zfcg/getMoreBulletin";
+	public String pageUrl = "http://zfcg.zwyun.bjtzh.gov.cn/zfcg/cmsInfo/%s";
 
 	@Override
 	public void process(Page page) {
-		Document doc = Jsoup.parse(page.getRawText());
-		Elements select = doc.select("#lab-show > div.as-floor-normal > div.span-f > div > ul > li");
-		if (select != null && select.size() != 0) {
-			for (Element element : select) {
-				String url = element.select("a").attr("href");
-				String title = element.select("span.txt").attr("title");
-				String date = element.select("span.time").text();
-				date = date.substring(date.lastIndexOf("：") + 1).replaceAll(" ", "");
+		Json json = page.getJson();
+		String pageJson = json.jsonPath("$..obj.list.results").toString();
+		if (pageJson != null) {
+			JSONArray jsonArray = JSONArray.parseArray(pageJson);
+			for (int i = 0; i < jsonArray.size(); i++) {
+				JSONObject o = jsonArray.getJSONObject(i);
+				String id = o.get("id").toString();
+				String title = o.get("mainTitle").toString();
+				String date = o.get("postDateStr").toString();
 				try {
 					if (startTime == null || (!"".equals(date) && !simpleDateFormat.parse(date).after(endTime) && !simpleDateFormat.parse(date).before(startTime))) {
-						Request request = new Request(url);
-						request.putExtra("date", date);
-						request.putExtra("title", title);
-						page.addTargetRequest(request);
+						String url = String.format(pageUrl, id);
+						driver.get(url);
+						Document parse = Jsoup.parse(driver.getPageSource());
+						String content = parse.select("body > div.main > div.news").text();
+						if ("".equals(content)) {
+							content = parse.select("#cmsBulletinDivForm").text();
+						}
+						if ("".equals(content)) {
+							content = parse.select("#abolishBulletinDivForm").text();
+						}
+						if ("".equals(content)) {
+							content = parse.select("#cmsBulletinDivFormNew").text();
+						}
+						if ("".equals(content)) {
+							content = parse.select("#cmsBulletinDivFormAlone").text();
+						}
+						CrawlerEntity crawlerEntity = new CrawlerEntity();
+						crawlerEntity.setUrl(url);
+						crawlerEntity.setTitle(title);
+						crawlerEntity.setCity(CITY);
+						crawlerEntity.setType(param.name);
+						crawlerEntity.setDate(date);
+						crawlerEntity.setContent(content);
+						crawlerEntity.setSource(SOURCE);
+						crawlerEntity.setIsCrawl("1");
+						commonService.insertTable(crawlerEntity, table);
 					} else if (startTime != null && !"".equals(date) && simpleDateFormat.parse(date).before(startTime)) {
 						isNext = false;
 					}
@@ -104,31 +138,13 @@ public class JdCpZbtDzjyptProcessor implements PageProcessor, Crawler {
 				}
 			}
 			if (isNext) {
-				HashMap<String, Object> map = new HashMap<>(4);
-				map.put("poClass", param.poClass);
-				map.put("infoClassCodes", param.infoClassCodes);
-				map.put("currentPage", String.valueOf(pageNum));
+				map.put("pageSize", String.valueOf(pageNum));
 				Request request = new Request(initUrl);
 				request.setMethod(HttpConstant.Method.POST);
 				request.setRequestBody(HttpRequestBody.form(map, "utf-8"));
 				page.addTargetRequest(request);
 				pageNum++;
 			}
-		} else {
-			String content = doc.select("#lab-show > div.as-floor-normal > div.span-f").text();
-			String title = page.getRequest().getExtra("title").toString();
-			String date = page.getRequest().getExtra("date").toString();
-			String url = page.getRequest().getUrl();
-			CrawlerEntity crawlerEntity = new CrawlerEntity();
-			crawlerEntity.setUrl(url);
-			crawlerEntity.setTitle(title);
-			crawlerEntity.setCity(CITY);
-			crawlerEntity.setType(param.name);
-			crawlerEntity.setDate(date);
-			crawlerEntity.setContent(content);
-			crawlerEntity.setSource(SOURCE);
-			crawlerEntity.setIsCrawl("1");
-			commonService.insertTable(crawlerEntity, table);
 		}
 	}
 
@@ -148,32 +164,37 @@ public class JdCpZbtDzjyptProcessor implements PageProcessor, Crawler {
 	@Override
 	public void run() {
 		try {
-			commonService.insertLogInfo(SOURCE, JdCpZbtDzjyptProcessor.class.getName(), "begin", "");
+			commonService.insertLogInfo(SOURCE, TzqZfcgwProcessor.class.getName(), "begin", "");
 			Map<String, String> days = commonUtil.getDays(Thread.currentThread().getStackTrace()[1].getClassName());
 			endTime = simpleDateFormat.parse(days.get("end"));
 			startTime = simpleDateFormat.parse(days.get("start"));
+			driver = chromeDriverPool.get();
 			table = commonUtil.getTableName();
 			for (Param param : Param.values()) {
-				HashMap<String, Object> map = new HashMap<>(4);
-				map.put("poClass", param.poClass);
-				map.put("infoClassCodes", param.infoClassCodes);
-				map.put("currentPage", "1");
-				JdCpZbtDzjyptProcessor bean = new JdCpZbtDzjyptProcessor();
+				HashMap<String, Object> map = new HashMap<>(8);
+				map.put("type", param.type);
+				map.put("orderByColumn", "postDate desc");
+				map.put("pageNum", "1");
+				map.put("pageSize", "12");
+				map.put("menu", "");
+				TzqZfcgwProcessor bean = new TzqZfcgwProcessor();
 				bean.commonService = commonService;
 				bean.param = param;
+				bean.map = map;
 				Spider spider = new Spider(bean);
 				Request request = new Request(bean.initUrl);
 				request.setMethod(HttpConstant.Method.POST);
 				request.setRequestBody(HttpRequestBody.form(map, "utf-8"));
 				spider.addRequest(request);
-				spider.setDownloader(new HttpClientDownloader());
 				spider.thread(2);
 				spider.run();
 			}
-			commonService.insertLogInfo(SOURCE, JdCpZbtDzjyptProcessor.class.getName(), "success", "");
+			commonService.insertLogInfo(SOURCE, TzqZfcgwProcessor.class.getName(), "success", "");
 		} catch (Exception e) {
 			e.printStackTrace();
-			commonService.insertLogInfo(SOURCE, JdCpZbtDzjyptProcessor.class.getName(), "error", e.getMessage());
+			commonService.insertLogInfo(SOURCE, TzqZfcgwProcessor.class.getName(), "error", e.getMessage());
+		} finally {
+			chromeDriverPool.release(driver);
 		}
 	}
 
@@ -181,18 +202,19 @@ public class JdCpZbtDzjyptProcessor implements PageProcessor, Crawler {
 		/**
 		 *
 		 */
-		ZBGG("招标公告", "BidNotice", "0105"),
-		BGGG("变更公告", "BidChange", "0106"),
-		PSJG("评审结果", "BidResult", "0107"),
-		ZBJG("中标公告", "BidResult", "0108");
+		TZTG("通知通告", "tztg"),
+		ZBGG("招标公告", "zbgg"),
+		GZGG("更正公告", "gzgg"),
+		DYLY("单一来源公示", "dyly"),
+		ZBCJ("中标成交", "zbcj"),
+		CGHT("采购合同", "cght"),
+		QTGG("其他公告", "qtgg");
 		private String name;
-		private String poClass;
-		private String infoClassCodes;
+		private String type;
 
-		Param(String name, String poClass, String infoClassCodes) {
+		Param(String name, String type) {
 			this.name = name;
-			this.poClass = poClass;
-			this.infoClassCodes = infoClassCodes;
+			this.type = type;
 		}
 	}
 }

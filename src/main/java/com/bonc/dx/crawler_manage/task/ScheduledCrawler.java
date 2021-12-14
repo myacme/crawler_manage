@@ -12,6 +12,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Map;
 
 @Component
@@ -28,7 +29,7 @@ public class ScheduledCrawler {
 	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	@Scheduled(cron = "0 20 0 * * ?")
-	public void execute() {
+	public void execute() throws UnsupportedEncodingException {
 		System.out.println("====================定时启动=================");
 //		proxyDriverPool.init(initSystemProperty);
 		driverPool.init(initSystemProperty);
